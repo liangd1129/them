@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纳信</title>
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #e5e5e5;
+            overflow: hidden;        /* 禁止body滚动，所有滚动在内部处理 */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 主窗口——全屏，无圆角，使用flex撑开 */
+        .wechat-frame {
+            width: 100%;
+            height: 100%;
+            background-color: #f0f2f5;
+            display: flex;
+            overflow: hidden;        /* 防止整体滚动 */
+        }
+
+        /* ========= 左侧导航 ========= */
+        .nav-sidebar {
+            width: 70px;
+            background-color: #2e2e2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            color: #b1b3b8;
+            flex-shrink: 0;          /* 固定宽度不压缩 */
+        }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            background-color: #6c6c6c;
+            border-radius: 18%;
+            margin-bottom: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23b0b0b0"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+            background-size: 60%;
+            background-position: center 55%;
+            background-repeat: no-repeat;
+            background-color: #4f4f4f;
+        }
+
+        .nav-icon {
+            width: 100%;
+            padding: 18px 0;
+            text-align: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #b1b3b8;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-icon.active {
+            color: #07c160;
+            background-color: #3a3a3a;
+            border-left-color: #07c160;
+        }
+
+        .nav-icon i {
+            font-size: 26px;
+        }
+
+        .nav-icon:not(.active):hover {
+            background-color: #3f3f3f;
+            color: #d4d4d4;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        /* ===== 中间列 (聊天列表) ===== */
+        .chat-list-panel {
+            width: 280px;
+            background-color: #fafafa;
+            border-right: 1px solid #e9e9e9;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;           /* 固定宽度不压缩 */
+            height: 100%;
+        }
+
+        .chat-list-header {
+            padding: 20px 16px 12px;
+            font-weight: 600;
+            font-size: 18px;
+            border-bottom: 1px solid #e9e9e9;
+            background-color: #fafafa;
+        }
+
+        .chat-items {
+            flex: 1;
+            overflow-y: auto;          /* 聊天列表滚动 */
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .chat-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .chat-item.active {
+            background-color: #e8e8e8;
+        }
+
+        .chat-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            background-color: #b7b7b7;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        .chat-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .chat-preview {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== 右侧内容面板 ===== */
+        .right-panel {
+            flex: 1;                   /* 占据剩余所有空间 */
+            background-color: #f6f6f6;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;          /* 让内部滚动 */
+            min-width: 300px;          /* 防止缩得太小 */
+        }
+
+        .panel-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e9e9e9;
+            background-color: #f6f6f6;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;            /* 头部固定 */
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: #07c160;
+            font-size: 14px;
+            margin-right: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .back-btn i {
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;          /* 右侧主要内容滚动 */
+            padding: 24px;
+            background-color: #f6f6f6;
+        }
+
+        /* 聊天消息气泡 (用于三个人) */
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message-bubble {
+            max-width: 70%;
+            margin-bottom: 18px;
+            display: flex;
+        }
+        .chat-message-bubble.left {
+            align-self: flex-start;
+        }
+        .chat-message-bubble.right {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .bubble-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: #b7b7b7;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .chat-message-bubble.right .bubble-avatar {
+            margin-right: 0;
+            margin-left: 10px;
+        }
+        .bubble-content {
+            background-color: white;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            word-break: break-word;
+        }
+        .chat-message-bubble.right .bubble-content {
+            background-color: #95ec69;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* 公众号主页样式 */
+        .mp-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .mp-icons-row {
+            display: flex;
+            gap: 28px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;          /* 适配小屏 */
+        }
+        .mp-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+        }
+        .mp-icon-item i {
+            font-size: 32px;
+            color: #07c160;
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 35%;
+        }
+
+        .mp-article-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .mp-article-card {
+            display: flex;
+            gap: 16px;
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .mp-article-card:hover {
+            background: #f0f0f0;
+        }
+        .mp-article-cover {
+            width: 100px;
+            height: 70px;
+            background-color: #d9d9d9;
+            border-radius: 8px;
+            background-image: linear-gradient(145deg, #c1c1c1 25%, #a8a8a8 75%);
+            flex-shrink: 0;
+        }
+        .mp-article-info h4 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .mp-article-info p {
+            font-size: 12px;
+            color: #888;
+        }
+		.mp-account {
+		    display: block;           /* 让它单独占一行 */
+		    font-size: 11px;
+		    color: #aaa;
+		    margin-bottom: 4px;       /* 与下方p保持间距 */
+		}
+
+        /* 文章详情页 */
+        .article-detail {
+            background: white;
+            border-radius: 18px;
+            padding: 28px 32px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .article-detail h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .article-detail p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* 收藏卡片列表 */
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .collection-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid #eee;
+        }
+        .collection-card:hover {
+            background: #f3f3f3;
+        }
+        .collection-card i {
+            font-size: 32px;
+            color: #07c160;
+            margin-bottom: 12px;
+        }
+        .collection-card h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .collection-card p {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* 收藏阅读视图 */
+     .collection-read {
+         background: white;
+         border-radius: 20px;
+         padding: 30px;
+         max-width: 1000px;   /* 修改这个值 */
+         margin: 0 auto;
+     }
+        .collection-read h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .collection-read .meta {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .collection-read .content-body {
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* 朋友圈样式 */
+        .moments-feed {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .moment-item {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.02);
+        }
+        .moment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .moment-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #aaa;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+        .moment-name {
+            font-weight: 600;
+        }
+        .moment-content {
+            margin-left: 58px;
+        }
+        .moment-text {
+            margin-bottom: 12px;
+        }
+        .moment-images {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .moment-images span {
+            width: 90px;
+            height: 90px;
+            background-color: #d4d4d4;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 文本辅助 */
+        .text-muted {
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* ---------- 自定义模态框样式 (新增) ---------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 24px;
+            width: 340px;
+            max-width: 90%;
+            padding: 24px 20px 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.2s ease;
+        }
+
+        .modal-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2e2e2e;
+        }
+
+        .modal-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 14px;
+            margin-bottom: 8px; /* 留出错误提示空间 */
+            outline: none;
+            transition: border 0.2s;
+        }
+        .modal-input:focus {
+            border-color: #07c160;
+        }
+        .modal-input.error {
+            border-color: #f44336;
+            background-color: #fff1f0;
+        }
+
+        .modal-error {
+            color: #f44336;
+            font-size: 12px;
+            margin-bottom: 12px;
+            min-height: 18px;
+            display: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal-btn-cancel {
+            background: #f2f2f2;
+            color: #333;
+        }
+        .modal-btn-cancel:hover {
+            background: #e5e5e5;
+        }
+        .modal-btn-confirm {
+            background: #07c160;
+            color: white;
+        }
+        .modal-btn-confirm:hover {
+            background: #06b158;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+<div class="wechat-frame">
+    <!-- 左侧导航栏 -->
+    <div class="nav-sidebar">
+        <div class="avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover; background-position: center;"></div>
+        <div class="nav-icon active" id="nav-chat" title="聊天"><i class="fa-regular fa-comment-dots"></i></div>
+        <div class="nav-icon" id="nav-collection" title="收藏文件"><i class="fa-regular fa-star"></i></div>
+        <div class="nav-icon" id="nav-moments" title="朋友圈"><i class="fa-regular fa-images"></i></div>
+        <div class="spacer"></div>
+    </div>
+
+    <!-- 聊天列表面板 (仅聊天页面可见) -->
+    <div class="chat-list-panel" id="chatListPanel">
+        <div class="chat-list-header">聊天</div>
+        <div class="chat-items">
+            <!-- 三个真实人物 + 一个公众号 -->
+            <div class="chat-item active" data-target="person1" id="chat-person1">
+                <div class="chat-avatar" style="background-image: url('../img/tongxue1.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="chat-info">
+                    <div class="chat-name">不重要的同学1</div>
+                    <div class="chat-preview">两位美食大师准备出击。</div>
+                </div>
+            </div>
+			
+            <div class="chat-item" data-target="person2" id="chat-person2">
+                <div class="chat-avatar" style="background-image: url('../img/tongxue2.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="chat-info">
+                    <div class="chat-name">不重要的同学2</div>
+                    <div class="chat-preview">好！羽毛球太好玩了哈哈</div>
+                </div>
+            </div>
+			
+            <div class="chat-item" data-target="person3" id="chat-person3">
+                <div class="chat-avatar" style="background-image: url('../img/tongxue3.jpg'); background-size: cover; background-position: center;"></div>
+                <div class="chat-info">
+                    <div class="chat-name">不重要的同学3</div>
+                    <div class="chat-preview">ok</div>
+                </div>
+            </div>
+			
+            <div class="chat-item" data-target="mp" id="chat-mp">
+                <div class="chat-avatar" style="background-color: #07c160;"><i class="fa-regular fa-newspaper"></i></div>
+                <div class="chat-info">
+                    <div class="chat-name">公众号</div>
+                    <div class="chat-preview">[公众号] 5G最新进展...</div>
+                </div>
+            </div>
+			
+			<!-- 新增：不重要的同学4 -->
+			<div class="chat-item" data-target="person4" id="chat-person4">
+			    <div class="chat-avatar" style="background-image: url('../img/tongxue4.jpg'); background-size: cover; background-position: center;"></div>
+			    <div class="chat-info">
+			        <div class="chat-name">不重要的同学4</div>
+			        <div class="chat-preview">好。</div>
+			    </div>
+			</div>
+        </div>
+    </div>
+
+    <!-- 右侧主要面板 -->
+    <div class="right-panel" id="rightPanel">
+        <!-- 动态头部 -->
+        <div class="panel-header" id="panelHeader">
+            <span id="headerTitle">不重要的同学1</span>
+            <div id="dynamicBack" style="margin-left: auto;"></div>
+        </div>
+
+        <!-- 右侧内容容器 -->
+        <div class="panel-content" id="panelContent">
+            <!-- 1. 不重要的同学1聊天记录 -->
+            <div class="chat-messages" id="chatViewPerson1">
+                <div class="chat-message-bubble left">
+                    <div class="bubble-avatar" style="background-image: url('../img/tongxue1.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">小颖~ 我们今天去西苑餐厅吧 好像新开了一家摇滚炒鸡ovo</div><div class="message-time">昨天 16:30</div></div>
+                </div>
+                <div class="chat-message-bubble right">
+                    <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">可以可以，上次校外那家炒鸡挺一般，试试这个。</div><div class="message-time">昨天 16:32</div></div>
+                </div>
+                <div class="chat-message-bubble left">
+                    <div class="bubble-avatar" style="background-image: url('../img/tongxue1.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">两位美食大师准备出击！！！</div><div class="message-time">昨天 16:33</div></div>
+                </div>
+            </div>
+
+            <!-- 2. 不重要的同学2聊天记录 -->
+            <div class="chat-messages hidden" id="chatViewPerson2">
+                <div class="chat-message-bubble left">
+                     <div class="bubble-avatar" style="background-image: url('../img/tongxue2.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">齐同学，今天打羽毛球很开心！下次有空再约？</div><div class="message-time">昨天 14：11</div></div>
+                </div>
+                <div class="chat-message-bubble right">
+                     <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">好！羽毛球太好玩了哈哈</div><div class="message-time">昨天 14：17</div></div>
+                </div>
+            </div>
+
+            <!-- 3. 不重要的同学3聊天记录 -->
+            <div class="chat-messages hidden" id="chatViewPerson3">
+                <div class="chat-message-bubble left">
+                    <div class="bubble-avatar" style="background-image: url('../img/tongxue3.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">实验报告我交上去了，你记得中午之前放到导师办公室里面。</div><div class="message-time">昨天 09:45</div></div>
+                </div>
+                <div class="chat-message-bubble right">
+                     <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover; background-position: center;"></div>
+                    <div><div class="bubble-content">ok</div><div class="message-time">昨天 09:50</div></div>
+                </div>
+            </div>
+			
+			<!-- 4. 不重要的同学4聊天记录（新增） -->
+			<div class="chat-messages hidden" id="chatViewPerson4">
+			    <div class="chat-message-bubble left">
+			        <div class="bubble-avatar" style="background-image: url('../img/tongxue4.jpg'); background-size: cover;"></div>
+			        <div><div class="bubble-content">你好！这位同学，你不是本地人吧？</div><div class="message-time">前天 10:00</div></div>
+			    </div>
+			    <div class="chat-message-bubble right">
+			        <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover;"></div>
+			        <div><div class="bubble-content">哈哈怎么看出来的？</div><div class="message-time">前天 10:01</div></div>
+			    </div>
+				<div class="chat-message-bubble left">
+				    <div class="bubble-avatar" style="background-image: url('../img/tongxue4.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">你和我认识的一个男生长得超级像，只是口音差了点。</div><div class="message-time">前天 10:05</div></div>
+				</div>
+				<div class="chat-message-bubble right">
+				    <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">哦？那他是哪儿人啊？</div><div class="message-time">前天 10:09</div></div>
+				</div>
+				<div class="chat-message-bubble left">
+				    <div class="bubble-avatar" style="background-image: url('../img/tongxue4.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">姬巷？他爸妈特别宠他，他现在在做公众号编辑，他爸爸死活不同意，要他回去相亲呢。</div><div class="message-time">前天 10:10</div></div>
+				</div>
+				<div class="chat-message-bubble right">
+				    <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">公众号名字叫什么呀？我去支持一下这位和我长得像的朋友。</div><div class="message-time">前天 10:10</div></div>
+				</div>
+				<div class="chat-message-bubble left">
+				    <div class="bubble-avatar" style="background-image: url('../img/tongxue4.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">叫小巷什么报，等我问问他，具体我也忘了。</div><div class="message-time">前天 10:12</div></div>
+				</div>
+				<div class="chat-message-bubble right">
+				    <div class="bubble-avatar" style="background-image: url('../img/touxiang.jpg'); background-size: cover;"></div>
+				    <div><div class="bubble-content">好</div><div class="message-time">前天 10:01</div></div>
+				</div>
+			</div>
+
+            <!-- 4. 公众号主页 -->
+            <div class="mp-profile hidden" id="mpHomeView">
+                <div class="mp-icons-row">
+                    <div class="mp-icon-item"><i class="fa-regular fa-bell"></i><span>功能介绍</span></div>
+                    <div class="mp-icon-item"><i class="fa-regular fa-circle-user"></i><span>历史文章</span></div>
+                    <div class="mp-icon-item"><i class="fa-regular fa-message"></i><span>联系客服</span></div>
+                </div>
+                <div class="mp-article-list">
+                    <div class="mp-article-card" id="article1">
+                        <div class="mp-article-cover" style="background-image: url('../img/cover1.jpg'); background-size: cover; background-position: center;"></div>
+                            <div class="mp-article-info">
+                            <h4>5G新动态：今年覆盖所有地级市</h4>
+							<span class="mp-account">科技早报</span> 
+                            <p>阅读量 21k · 2小时前</p>
+                        </div>
+                    </div>
+                    <div class="mp-article-card" id="article2">
+                        <div class="mp-article-cover" style="background-image: url('../img/cover2.jpg'); background-size: cover; background-position: center;"></div>
+                        <div class="mp-article-info">
+                            <h4>你会时常想起老家姬巷的那一碗羊汤烧饼吗？</h4>
+							<span class="mp-account">XX日报</span> 
+                            <p>阅读量 1k · 昨天</p>
+                        </div>
+                    </div>
+                    <div class="mp-article-card" id="article3">
+                         <div class="mp-article-cover" style="background-image: url('../img/cover3.jpg'); background-size: cover; background-position: center;"></div>
+                        <div class="mp-article-info">
+                            <h4>智能手表新功能曝光</h4>
+							<span class="mp-account">老王有话说</span> 
+                            <p>阅读量 8k · 前天</p>
+                        </div>
+                    </div>
+					<div class="mp-article-card" id="article4">   <!-- 修正重复ID为 article4 -->
+					     <div class="mp-article-cover" style="background-image: url('../img/cover4.jpg'); background-size: cover; background-position: center;"></div>
+					    <div class="mp-article-info">
+					        <h4>Z大课程表上线新功能！</h4>
+							<span class="mp-account">Z大公众号</span> 
+					        <p>阅读量 2k · 前天</p>
+					    </div>
+					</div>
+                </div>
+            </div>
+
+            <!-- 5. 公众号文章详情页 (以第二篇为例) -->
+            <div class="article-detail hidden" id="mpArticleView">
+                <h2>你会时常想起老家姬巷的那一碗羊汤烧饼吗？</h2>
+				 <p style="color:#aaa; font-style:italic;">XX日报 · 已收藏</p>
+                <p>A县虽然是贫困县，可在美食方面却不“贫困”。羊汤烧饼，作为当地有名的美食，时常勾起在外游子的一缕缕愁思。</p>
+                    <p>你是否有过这样的经历？人在外地，肚子咕咕作响，到了吃饭时间。可是在外卖平台上左看右看，仍然找不到自己想吃的东西。肚子的抗拒声越来越大，你不得不向它妥协，随意点了一份外卖。扣款声音刚刚响起，你就想到了儿时村中的味道。</p>
+                    <p>村口的大铁锅咕嘟咕嘟地响了一整日，清亮的羊骨汤，蒸汽顶着锅盖，香气能飘过半个村子。打好的饼胚在掌心摊开时微微发黄，撒上一把本地产的芝麻，贴在泥炉子内壁。不消多时，炉子内传来声声脆响。这时趁热将滚烫的烧饼“咔嚓”一声掰开，任由热腾腾的麦香与炭火气冲出来，然后顺着掰开的缝，“嘶啦”一下撕成大小不规则的块，一股脑儿摁进面前那碗滚烫的羊汤里。</p>
+                    <p>哈哈，看到这里有没有想回家看看呢？</p>
+                    <p>此时的姬巷村和它所处的A县，与羊汤锅里升腾的蒸汽一样，正散发着前所未有的、蓬勃滚烫的活力。若你此刻归来，定会惊讶于这片土地在肌理之处的深刻改变。</p>
+                    <p>A县这个曾经的贫困县，深知自己的“财富”所在。它没有盲目追求烟囱林立的工业，而是将“美食文化+生态旅游”作为发展的主轴。除了姬巷的羊汤烧饼，县里其他乡镇的酱菜、豆腐、山野菌子，都被挖掘、包装，形成了丰富的地方物产矩阵。一条条旅游专线将各个美食村落串联起来，游客可以在这里体验从田间到灶头的完整风味之旅。</p>
+                    <p>现在的姬巷很好。炉火比以往任何时候都更旺，那锅汤依旧按照古法，从容不迫地咕嘟着。只是围坐在锅边的人，除了皱纹里藏着故事的老人，多了许多眼里有光的年轻人，以及慕名而来、满心好奇的远方客人。</p>
+                    <p>这里的发展，就像那碗羊汤烧饼——底色依然是传统与淳厚，但有了更丰富的配搭、更广阔的天地，以及一个确定无疑的、越来越好的未来。</p>
+                <p style="color:#aaa; font-style:italic;">文章已修改 1 次</p>
+            </div>
+
+            <!-- 6. 收藏页面：卡片列表 -->
+            <div class="collection-grid hidden" id="collectionGridView">
+				
+				<div class="collection-card" data-collection="1">
+				    <i class="fa-regular fa-file-lines"></i>
+				    <h4>笔记</h4>
+				    <p>今天</p>
+				</div>
+				
+				<div class="collection-card" data-collection="3">
+				    <i class="fa-regular fa-file-zipper"></i>
+				    <h4>公众号文章</h4>
+				    <p>昨天</p>
+				</div>
+				
+            
+				
+                <div class="collection-card" data-collection="2">
+                    <i class="fa-regular fa-image"></i>
+                    <h4>不重要的风景合集</h4>
+                    <p>3月前</p>
+                </div>
+				
+               
+            </div>
+
+            <!-- 7. 收藏阅读详情（已添加ID用于动态更新） -->
+            <div class="collection-read hidden" id="collectionReadView">
+                <h3 id="collectionTitle">项目计划书.pdf</h3>
+                <div class="meta" id="collectionMeta">上次阅读: 昨天 · 2.3 MB</div>
+                <div class="content-body" id="collectionBody">
+                    这是模拟的文件阅读内容。您可以想象这是一份PDF的文本预览：包含项目背景、执行计划、预算等。由于是演示，此处仅为占位文字。点击返回可回到收藏列表。
+                </div>
+            </div>
+
+            <!-- 8. 朋友圈视图 -->
+            <div class="moments-feed hidden" id="momentsView">
+                <div class="moment-item">
+                    <div class="moment-header">
+                        <div class="moment-avatar" style="background-color: #c0a0c0;"></div>
+                        <span class="moment-name">陈晓</span>
+                    </div>
+                    <div class="moment-content">
+                        <div class="moment-text">周末的日落，太美了🌇</div>
+                        <div class="moment-images"><span></span><span></span></div>
+                    </div>
+                </div>
+                <div class="moment-item">
+                    <div class="moment-header">
+                        <div class="moment-avatar" style="background-color: #70a0ff;"></div>
+                        <span class="moment-name">James</span>
+                    </div>
+                    <div class="moment-content">
+                        <div class="moment-text">新买的键盘，敲代码舒服极了</div>
+                        <div class="moment-images"><span></span><span></span><span></span></div>
+                    </div>
+                </div>
+                <div class="moment-item">
+                    <div class="moment-header">
+                        <div class="moment-avatar" style="background-color: #e0a070;"></div>
+                        <span class="moment-name">小鹿</span>
+                    </div>
+                    <div class="moment-content">
+                        <div class="moment-text">打卡网红咖啡店☕️</div>
+                        <div class="moment-images"><span></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 自定义模态框 (新增) -->
+<div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>🔒 搜索文章</h3>
+        <p>请输入收藏文章的公众号名称查看文章：</p>
+        <input type="text" id="modalInput" class="modal-input" placeholder="请输入答案" autofocus>
+        <div id="modalError" class="modal-error">验证失败，请重试</div>
+        <div class="modal-actions">
+            <button id="modalCancel" class="modal-btn modal-btn-cancel">取消</button>
+            <button id="modalConfirm" class="modal-btn modal-btn-confirm">确认</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 获取元素
+        const navChat = document.getElementById('nav-chat');
+        const navCollection = document.getElementById('nav-collection');
+        const navMoments = document.getElementById('nav-moments');
+        const chatListPanel = document.getElementById('chatListPanel');
+        const panelHeader = document.getElementById('panelHeader');
+        const headerTitle = document.getElementById('headerTitle');
+        const dynamicBack = document.getElementById('dynamicBack');
+
+        // 右侧内容块
+        const person1Chat = document.getElementById('chatViewPerson1');
+        const person2Chat = document.getElementById('chatViewPerson2');
+        const person3Chat = document.getElementById('chatViewPerson3');
+        const person4Chat = document.getElementById('chatViewPerson4');
+        const mpHome = document.getElementById('mpHomeView');
+        const mpArticle = document.getElementById('mpArticleView');
+        const collectionGrid = document.getElementById('collectionGridView');
+        const collectionRead = document.getElementById('collectionReadView');
+        const momentsFeed = document.getElementById('momentsView');
+
+        // 聊天条目
+        const chatPerson1 = document.getElementById('chat-person1');
+        const chatPerson2 = document.getElementById('chat-person2');
+        const chatPerson3 = document.getElementById('chat-person3');
+        const chatPerson4 = document.getElementById('chat-person4');
+        const chatMp = document.getElementById('chat-mp');
+
+        // 所有右侧视图数组
+        const allViews = [person1Chat, person2Chat, person3Chat, person4Chat, mpHome, mpArticle, collectionGrid, collectionRead, momentsFeed];
+
+        // 所有聊天条目
+        const chatItems = [chatPerson1, chatPerson2, chatPerson3, chatPerson4, chatMp];
+        const navIcons = [navChat, navCollection, navMoments];
+
+        // 状态变量
+        let currentMainPage = 'chat'; // 'chat', 'collection', 'moments'
+        let currentChatSub = 'person1'; // person1, person2, person3, person4, mp
+        let inMpArticle = false;
+        let inCollectionRead = false;
+
+        // 模态框元素
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalInput = document.getElementById('modalInput');
+        const modalError = document.getElementById('modalError');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        let pendingCard = null;
+
+        // 辅助函数：隐藏所有右侧视图
+        function hideAllViews() {
+            allViews.forEach(v => v.classList.add('hidden'));
+        }
+
+        // 移除所有聊天条目active
+        function clearChatActive() {
+            chatItems.forEach(item => item.classList.remove('active'));
+        }
+
+        // 移除所有导航active
+        function clearNavActive() {
+            navIcons.forEach(icon => icon.classList.remove('active'));
+        }
+
+        // 更新右侧标题
+        function setHeaderTitle(text, showBack = false, backHandler = null) {
+            headerTitle.innerText = text;
+            if (showBack) {
+                dynamicBack.innerHTML = '<button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i> 返回</button>';
+                document.getElementById('backBtn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (backHandler) backHandler();
+                });
+            } else {
+                dynamicBack.innerHTML = '';
+            }
+        }
+
+        // 重置到聊天主页面 (根据currentChatSub)
+        function showChatSubPage(keepArticle = false) {
+            hideAllViews();
+            if (!keepArticle && inMpArticle) inMpArticle = false;
+
+            if (currentChatSub === 'person1') {
+                person1Chat.classList.remove('hidden');
+                setHeaderTitle('不重要的同学1');
+            } else if (currentChatSub === 'person2') {
+                person2Chat.classList.remove('hidden');
+                setHeaderTitle('不重要的同学2');
+            } else if (currentChatSub === 'person3') {
+                person3Chat.classList.remove('hidden');
+                setHeaderTitle('不重要的同学3');
+            } else if (currentChatSub === 'person4') {
+                person4Chat.classList.remove('hidden');
+                setHeaderTitle('不重要的同学4');
+            } else if (currentChatSub === 'mp') {
+                if (inMpArticle) {
+                    mpArticle.classList.remove('hidden');
+                    setHeaderTitle('公众号 · 文章', true, () => {
+                        inMpArticle = false;
+                        showChatSubPage();
+                        clearChatActive();
+                        chatMp.classList.add('active');
+                    });
+                } else {
+                    mpHome.classList.remove('hidden');
+                    setHeaderTitle('公众号');
+                    dynamicBack.innerHTML = '';
+                }
+            }
+        }
+
+        // 切换到收藏主页面 (卡片列表)
+        function showCollectionMain() {
+            inCollectionRead = false;
+            hideAllViews();
+            collectionGrid.classList.remove('hidden');
+            setHeaderTitle('收藏的文件', false);
+        }
+
+        // 切换到朋友圈
+        function showMoments() {
+            hideAllViews();
+            momentsFeed.classList.remove('hidden');
+            setHeaderTitle('朋友圈', false);
+        }
+
+        // 处理导航点击
+        navChat.addEventListener('click', () => {
+            if (currentMainPage === 'chat') return;
+            clearNavActive();
+            navChat.classList.add('active');
+            chatListPanel.style.display = 'flex';
+            currentMainPage = 'chat';
+            currentChatSub = 'person1';
+            inMpArticle = false;
+            clearChatActive();
+            chatPerson1.classList.add('active');
+            showChatSubPage();
+        });
+
+        navCollection.addEventListener('click', () => {
+            clearNavActive();
+            navCollection.classList.add('active');
+            chatListPanel.style.display = 'none';
+            currentMainPage = 'collection';
+            showCollectionMain();
+        });
+
+        navMoments.addEventListener('click', () => {
+            clearNavActive();
+            navMoments.classList.add('active');
+            chatListPanel.style.display = 'none';
+            currentMainPage = 'moments';
+            showMoments();
+        });
+
+        // 聊天条目点击
+        chatPerson1.addEventListener('click', () => {
+            if (currentMainPage !== 'chat') return;
+            clearChatActive();
+            chatPerson1.classList.add('active');
+            currentChatSub = 'person1';
+            inMpArticle = false;
+            showChatSubPage();
+        });
+        chatPerson2.addEventListener('click', () => {
+            if (currentMainPage !== 'chat') return;
+            clearChatActive();
+            chatPerson2.classList.add('active');
+            currentChatSub = 'person2';
+            inMpArticle = false;
+            showChatSubPage();
+        });
+        chatPerson3.addEventListener('click', () => {
+            if (currentMainPage !== 'chat') return;
+            clearChatActive();
+            chatPerson3.classList.add('active');
+            currentChatSub = 'person3';
+            inMpArticle = false;
+            showChatSubPage();
+        });
+        chatPerson4.addEventListener('click', () => {
+            if (currentMainPage !== 'chat') return;
+            clearChatActive();
+            chatPerson4.classList.add('active');
+            currentChatSub = 'person4';
+            inMpArticle = false;
+            showChatSubPage();
+        });
+        chatMp.addEventListener('click', () => {
+            if (currentMainPage !== 'chat') return;
+            clearChatActive();
+            chatMp.classList.add('active');
+            currentChatSub = 'mp';
+            inMpArticle = false;
+            showChatSubPage();
+        });
+
+        // 公众号图文点击：第二篇点进去可阅读
+        document.getElementById('article2').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentMainPage !== 'chat' || currentChatSub !== 'mp') return;
+            inMpArticle = true;
+            showChatSubPage(true);
+        });
+
+        // 收藏卡片点击 (根据 data-collection 显示不同内容)
+        const collectionCards = document.querySelectorAll('.collection-card');
+        
+        // 定义打开收藏详情的函数（复用）
+        function openCollectionDetail(collectionId) {
+            let title, meta, body;
+            if (collectionId === '1') {
+                title = '笔记';
+                meta = '今天 · 2.3 KB';
+                body = '<p><b>重要</b></p><p>千万别忘了交实验报告！！！</p><p>之前很讨厌运动，感觉好累，没想到羽毛球这么好玩，喜欢。</p>。<p></p><p>。</p>'+
+                    '<p><b>随笔</b></p> <p>姬巷，好熟悉的地名，之前听父母说</p>';
+            } else if (collectionId === '2') {
+                title = '不重要的风景合集';
+                meta = '3月前 · 15 MB';
+                body = '这个压缩包包含一些风景照片，拍摄于云南、西藏和新疆。有梅里雪山的日照金山、喀纳斯的秋色、洱海的日落等。';
+            } else if (collectionId === '3') {
+                title = '公众号文章';
+                meta = '昨天 · 876 KB';
+                // 替换为用户提供的长文本，并添加阅读全文链接
+                body = '<p>你会时常想起老家姬巷的那一碗羊汤烧饼吗？</p>' +
+                       '<p>姬巷村位于我市A县，A县虽然是贫困县可在美食方面却不“贫困”。羊汤烧饼，作为当地有名的美食时常勾起在外游子的一缕缕愁思。</p>' +
+                       '<p>你是否有过这样的经历，人在外地，肚子咕咕作响，到了吃饭时间。可是在外卖平台上左看右看，仍然找不到自己想吃的东西。肚子的抗拒声越来越大，你不得不向他妥协，随意点了一份外卖。扣款声音刚刚响起，你就想到了儿时村中的味道。</p>' +
+                       '<p>村口的大铁锅咕嘟咕嘟的响了一整日，清亮的羊骨汤，蒸汽顶着锅盖，香气能飘过半个村子。打好的饼胚在掌心摊开时微微发黄，撒上一把本地产的芝麻，贴在泥炉子内壁。不消多时，炉子内传来声声脆响。这时趁热将滚烫的烧饼“咔嚓”一声掰开，任由热腾腾的麦香与炭火气冲出来，然后顺着掰开的缝，“嘶啦”一下撕成大小不规则的块，一股脑儿摁进面前那碗滚烫的羊汤里。</p>' +
+                       '<p>哈哈，看到这里有没有想回家看看呢？</p>' +
+                       '<p>此时的姬巷村和它所处的A县，与羊汤锅里升腾的蒸汽一样，正散发着前所未有的、蓬勃滚烫的活力。若你此刻归来，定会惊讶于这片土地在肌理之处的深刻改变。</p>' +
+                       '<p>A县这个曾经的贫困县，深知自己的“财富”所在。它没有盲目追求烟囱林立的工业，而是将“美食文化+生态旅游”作为发展的主轴。除了姬巷的羊汤烧饼，县里其他乡镇的酱菜、豆腐、山野菌子，都被挖掘、包装，形成了丰富的地方物产矩阵。一条条旅游专线将各个美食村落串联起来，游客可以在这里体验从田间到灶头的完整风味之旅。</p>' +
+                       '<p>现在的姬巷很好。炉火比以往任何时候都更旺，那锅汤依旧按照古法，从容不迫地咕嘟着。只是围坐在锅边的人，除了皱纹里藏着故事的老人，多了许多眼里有光的年轻人，以及慕名而来、满心好奇的远方客人。</p>' +
+                       '<p>这里的发展，就像那碗羊汤烧饼——底色依然是传统与淳厚，但有了更丰富的配搭、更广阔的天地，以及一个确定无疑的、越来越好的未来。</p>' +
+                      '<p style="margin-top: 24px;"><span onclick="window.location.href=\'./baogao.html\';" style="color: #07c160; cursor: pointer; font-weight: 500;">📖 阅读全文 →</span></p>';
+            }
+    
+            // 更新阅读视图的内容
+            document.getElementById('collectionTitle').innerText = title;
+            document.getElementById('collectionMeta').innerText = meta;
+            document.getElementById('collectionBody').innerHTML = body;
+    
+            // 切换到阅读视图
+            inCollectionRead = true;
+            hideAllViews();
+            collectionRead.classList.remove('hidden');
+            setHeaderTitle(title, true, () => {
+                showCollectionMain(); // 返回收藏列表
+            });
+        }
+
+        // 重置模态框状态（清除错误样式和提示）
+        function resetModalState() {
+            modalInput.classList.remove('error');
+            modalError.style.display = 'none';
+        }
+
+        // 当用户开始输入时，清除错误状态
+        modalInput.addEventListener('input', () => {
+            resetModalState();
+        });
+
+        collectionCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (currentMainPage !== 'collection') return;
+        
+                const collectionId = card.getAttribute('data-collection'); // "1", "2", "3"
+                
+                // 对公众号文章（collectionId === '3'）显示自定义模态框
+                if (collectionId === '3') {
+                    // 显示模态框，重置状态
+                    modalOverlay.classList.remove('hidden');
+                    modalInput.value = '';
+                    resetModalState();
+                    modalInput.focus();
+                    pendingCard = card;
+                    
+                    e.stopPropagation();
+                    
+                    const onConfirm = () => {
+                        const answer = modalInput.value.trim();
+                        if (answer === '小巷日报') {
+                            // 验证通过
+                            modalOverlay.classList.add('hidden');
+                            modalConfirm.removeEventListener('click', onConfirm);
+                            modalCancel.removeEventListener('click', onCancel);
+                            openCollectionDetail(collectionId);
+                        } else {
+                            // 搜索失败，无文章
+                            modalInput.classList.add('error');
+                            modalError.style.display = 'block';
+                        }
+                    };
+                    
+                    const onCancel = () => {
+                        modalOverlay.classList.add('hidden');
+                        modalConfirm.removeEventListener('click', onConfirm);
+                        modalCancel.removeEventListener('click', onCancel);
+                        resetModalState();
+                    };
+                    
+                    // 移除旧监听器，添加新监听器
+                    modalConfirm.removeEventListener('click', onConfirm);
+                    modalCancel.removeEventListener('click', onCancel);
+                    modalConfirm.addEventListener('click', onConfirm);
+                    modalCancel.addEventListener('click', onCancel);
+                    
+                    return;
+                }
+                
+                // 其他卡片直接打开
+                openCollectionDetail(collectionId);
+            });
+        });
+
+        // 点击模态框背景关闭
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.add('hidden');
+                resetModalState();
+            }
+        });
+
+        // 初始化
+        window.addEventListener('load', () => {
+            clearNavActive();
+            navChat.classList.add('active');
+            chatListPanel.style.display = 'flex';
+            clearChatActive();
+            chatPerson1.classList.add('active');
+            currentMainPage = 'chat';
+            currentChatSub = 'person1';
+            showChatSubPage();
+        });
+    })();
+</script>
+</body>
+</html>
