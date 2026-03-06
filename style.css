@@ -1,0 +1,82 @@
+/* 全局重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 三列容器 */
+.container {
+    display: flex;
+    flex-wrap: wrap;          /* 允许在小屏幕下换行 */
+    gap: 20px;                /* 卡片间距 */
+    max-width: 1200px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* 卡片通用样式 */
+.card {
+    flex: 1 1 250px;           /* 基础宽度250px，可伸缩 */
+    max-width: 350px;
+    min-width: 250px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 鼠标悬停效果 */
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* 卡片内文字 */
+.card h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.card p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* 可以为每个卡片设置不同的背景色（可选） */
+.left {
+    background: #ffdab9;  /* 浅橙色 */
+}
+.center {
+    background: #e6e6fa;  /* 淡紫色 */
+}
+.right {
+    background: #f0e68c;  /* 卡其色 */
+}
+
+/* 小屏幕适配：一行一个卡片 */
+@media (max-width: 600px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .card {
+        width: 100%;
+        max-width: 100%;
+    }
+}
