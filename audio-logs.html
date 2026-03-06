@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>塔 · 录音档案</title>
+  <style>
+    /* ---------- 全局样式 ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #0e0b09;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem;
+      position: relative;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .back-link {
+      width: 80px;
+      text-align: center;
+      color: #b8aa9c;
+      text-decoration: none;
+      font-size: 1.2rem;
+      border: 2px solid #5f5343;
+      padding: 0.5rem 0.2rem;
+      transition: 0.2s;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+    .back-link:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    .page-title {
+      font-size: 3rem;
+      color: #7a6852;
+      text-shadow: 4px 4px 0 #1e1813;
+      letter-spacing: 4px;
+      margin: 0;
+      border-bottom: 3px double #6a5a48;
+      padding-bottom: 0.5rem;
+      font-family: 'Times New Roman', serif;
+      text-align: center;
+      flex: 0 1 auto;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 0.3rem;
+      width: 180px;
+      justify-content: flex-end;
+      margin-right: 20px;
+      margin-top: -40px;
+    }
+
+    .action-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.15rem 0;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-top-right-radius: 15px;
+      border-bottom-left-radius: 15px;
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.2;
+      height: 24px;
+    }
+    .action-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background-color: #1a1613;
+      border: 2px solid #5f5343;
+      padding: 0.3rem 1.5rem;
+      margin-bottom: 1rem;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      flex-wrap: wrap;
+    }
+
+    .level-selector {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .level-btn {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.25rem 1.0rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-top-right-radius: 15px;
+      border-bottom-left-radius: 15px;
+    }
+    .level-btn.active {
+      background-color: #4f4236;
+      border-color: #c7aa8b;
+      color: #f7ede0;
+    }
+    .level-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+    }
+
+    .search-box {
+      flex: 1;
+      display: flex;
+      gap: 0.5rem;
+      min-width: 250px;
+    }
+    .search-input {
+      flex: 1;
+      background-color: #1e1a16;
+      border: 2px solid #5f5343;
+      padding: 0.25rem 1rem;
+      color: #cfc5b7;
+      font-size: 1rem;
+      font-family: inherit;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #ad977b;
+      background-color: #2b241f;
+    }
+    .search-btn {
+      background-color: #3b3229;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 1.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+    .search-btn:hover {
+      background-color: #4f4236;
+      border-color: #c7aa8b;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 2rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .left-panel {
+      width: 20%;
+      min-width: 250px;
+      background-color: #1a1613;
+      border: 2px solid #5f5343;
+      padding: 1.5rem 1rem;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    .left-panel h2 {
+      color: #dac5b0;
+      font-size: 1.1rem;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .file-item {
+      padding: 0.3rem 0.8rem;
+      border: 2px solid transparent;
+      border-bottom: 1px dashed #5f5343;
+      color: #cfc5b7;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    .file-item:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+    }
+    .file-item.active {
+      background-color: #3b3229;
+      border-color: #c7aa8b;
+      color: #f7ede0;
+    }
+    .file-item.new-file {
+      background-color: #4a3f35;
+      border-left: 4px solid #c7aa8b;
+    }
+    .file-name {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .right-panel {
+      width: 80%;
+      background-color: #1a1613;
+      border: 2px solid #5f5343;
+      padding: 2rem;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      overflow-y: auto;
+    }
+    .detail-title {
+      font-size: 1.5rem;
+      color: #dac5b0;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+      word-break: break-word;
+    }
+    .detail-description {
+      font-size: 1.0rem;
+      line-height: 1.8;
+      color: #cfc5b7;
+      white-space: pre-wrap;
+    }
+
+    /* 可点击的日记链接样式 */
+    .diary-link {
+      color: #8ab3cf;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .diary-link:hover {
+      color: #c7e0f0;
+      text-shadow: 0 0 5px rgba(138, 179, 207, 0.5);
+    }
+
+    /* 模态框样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background-color: #1a1613;
+      border: 3px solid #7d6b58;
+      padding: 2rem;
+      width: 300px;
+      text-align: center;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      box-shadow: 0 20px 30px -10px black;
+    }
+    .modal-content h3 {
+      color: #dac5b0;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      border-left: 4px solid #9e7e5e;
+      padding-left: 0.8rem;
+      text-align: left;
+    }
+    .slot-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    .slot-btn {
+      width: 60px;
+      height: 60px;
+      background-color: #2b241f;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+    .slot-btn:hover {
+      background-color: #4f4236;
+      border-color: #c7aa8b;
+      color: #f7ede0;
+    }
+    .slot-btn.has-save {
+      background-color: #4a3f35;
+      border-color: #c7aa8b;
+      color: #f7ede0;
+    }
+    .modal-close {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.5rem 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 1rem;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+    .modal-close:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+    }
+
+    /* 滚动条样式 */
+    .file-list::-webkit-scrollbar,
+    .right-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+    .file-list::-webkit-scrollbar-track,
+    .right-panel::-webkit-scrollbar-track {
+      background: #1e1a16;
+      border-radius: 4px;
+    }
+    .file-list::-webkit-scrollbar-thumb,
+    .right-panel::-webkit-scrollbar-thumb {
+      background: #5f5343;
+      border-radius: 4px;
+      border: 1px solid #3b3229;
+    }
+    .file-list::-webkit-scrollbar-thumb:hover,
+    .right-panel::-webkit-scrollbar-thumb:hover {
+      background: #7d6b58;
+    }
+
+    @media (max-width: 800px) {
+      body { padding: 1rem; }
+      .top-row { flex-wrap: wrap; gap: 0.5rem; }
+      .page-title { order: -1; width: 100%; }
+      .back-link, .top-buttons { width: auto; }
+      .action-btn { height: auto; padding: 0.2rem 0.5rem; width: auto; flex: 0 1 auto; }
+      .main-content { flex-direction: column; }
+      .left-panel, .right-panel { width: 100%; }
+      .left-panel { min-width: auto; }
+      .nav-bar { flex-direction: column; align-items: stretch; }
+      .search-box { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-row">
+    <a href="./index.html" class="back-link" onclick="window.location.href='./index.html'">返回</a>
+    <h1 class="page-title">录音档案</h1>
+    <div class="top-buttons">
+      <button class="action-btn" id="saveBtn">存档</button>
+      <button class="action-btn" id="loadBtn">读档</button>
+      <button class="action-btn" id="resetBtn">重置</button>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <div class="level-selector">
+      <button class="level-btn active" data-level="下层">下层</button>
+      <button class="level-btn" data-level="中层">中层</button>
+      <button class="level-btn" data-level="上层">上层</button>
+      <button class="level-btn" data-level="顶层">顶层</button>
+    </div>
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="输入文件名关键词...">
+      <button class="search-btn" id="searchBtn">搜索</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-panel">
+      <h2>已知文件</h2>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    <div class="right-panel">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-description" id="detailDescription"></div>
+      <!-- 移除了“记入日记”按钮 -->
+    </div>
+  </div>
+
+  <div class="modal" id="slotModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">选择槽位</h3>
+      <div class="slot-buttons">
+        <button class="slot-btn" data-slot="1">1</button>
+        <button class="slot-btn" data-slot="2">2</button>
+        <button class="slot-btn" data-slot="3">3</button>
+      </div>
+      <button class="modal-close" id="closeModalBtn">取消</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const levelBtns = document.querySelectorAll('.level-btn');
+      const allLevels = Array.from(levelBtns).map(btn => btn.dataset.level);
+
+      const initialFiles = {
+        '下层': { name: '0-help', 
+          description: '嗨，我是负责这次行动的调查员之一，如果你能看到这行字就说明我们的猜测是对的。想必这次的目的你也了解了，我现在要告诉你一切更加深入的内容。\n我和另一位调查员收集了许多录音资料，可就在我们将录音资料整理好的那晚，我二人双双晕倒，醒来后不但失去了塔内和整理录音的记忆，连录音也听不到任何内容了。同时，我们发现，我二人在听录音的状态下写的字也消失了。目前，仅剩我们整理过后的录音文件。\n经多方打听我们才知道，我和另一位调查员都是千禧年在姬巷村出生的孩子，因各种原因不在姬巷村长大。所以组织推测，只有符合这两个条件的人才能进入塔内或者听到录音资料。\n除此之外，我们还获得一些关于此塔的消息。村内大部分人都对这座塔避之不谈，唯有一位精神状态颇差的女士向我们透露，这座塔是一座存在诅咒的塔，沾染到塔的人都会不幸，这一点我觉得真实性有待商榷。\n调查就此陷入僵局，万幸的是，另一位调查员发现纸张上的留下的印痕，应是在听录音时留下来的。我和另一位调查员一致认为，看的到那行字的人也能听到录音。所以我们向所有疑似目标发送了那篇文章，又因为不想牵涉到太多无关人员，设置了输入名单内的名字才能进入的方式，请你原谅我们的谨慎。\n现在由我来讲述我们团队的录音命名规则与如何使用此系统。\n通常情况下，我们会将录音文件的名字分为三部分。第一部分是录音的大体位置或者楼层的选择，第二部分为具体位置，大多为单字，最后一部分则是场景下的人员，方便起见会给每位一个固定的编号，用阿拉伯数字表示，而最后两部分之间用短横线“-”连接。\n这样说仿佛有些复杂，我给你举个例子，在我和另一位调查员的研究下，我们找到了两个文件，分别为下层的<strong>门-6</strong>和<strong>门-1-7</strong>，你可以搜索试试。抱歉，我们能提供的帮助只有这些，希望能为你提供一些思路。\n最后，我二人向你表达最真挚的感谢，感谢你愿意帮助我们。' },
+        '中层': { name: '中层密录.aac', description: '中层某个密室的录音，包含模糊的对话片段，语言无法识别。' },
+        '上层': { name: '上层风声.wav', description: '塔顶的风声录音，夹杂着遥远的尖啸。可能是某种警告。' }
+      };
+      initialFiles['顶层'] = { name: '顶层初始文件', description: '该楼层暂无录音内容。' };
+
+      const levelFiles = {
+        '下层': [
+          { name: '门-6', description:  '(哔哔——)\n' +
+    '(录音机开始工作的声音)\n' +
+    '6：有人吗？有人吗？\n' +
+    '(听着过了一会儿)\n' +
+    '6：怎么刚走到门口就走丢了？小琛——小琛——听得到吗？\n' +
+    '(很安静，只能听到微微风声和脚步声)\n' +
+    '6：怎么回事？我不是按照原路走的吗？怎么又回来了？\n' +
+    '(又过一会儿)\n' +
+    '6：情况不妙，我多次试着原路返回的但好像一直在原地打转。\n' +
+    '6：汇报一下当前情况，目前和小琛走散了，她身上只有一个录音设备，其余的都在我这里，并且此地十分诡异。\n' +
+    '6：我决定先进到<b>大厅</b>里面，身上的录音设备一直运作，就算出了事应该也会获得一些线索。\n' +
+    '(随即，吱啦的开门声)' },
+          { name: '门-1-7', description: '(哔哔——）\n' +
+    '(录音机开始工作的声音)\n' +
+    '7：心玥姐？你在哪儿？\n' +
+    '7：心玥姐，这里雾好大啊，我不知道该往哪儿走。\n' +
+    '（过了一会儿，有吱啦的开门声，随即是深呼吸的声音）\n' +
+    '7：汇报一下目前情况，我与心玥姐走散了，具体位置不知，我看到门里的<b>大厅</b>亮着光，我决定进去看看。\n' +
+    '1：你有没有见两个人从这里出去？\n' +
+    '（声音听起来是个十五六岁的女孩）\n' +
+    '7：你是谁？\n' +
+    '1：哎呦算了，你先进来<b>大厅</b>再说吧。\n' +
+    '7：你先说你是谁。\n' +
+    '1：我叫郑凡，<b>大厅</b>里还有翠柳姐，飞燕姐，默姐，我们都是不知道怎么回事到这里的。现在你放心了吧？\n' +
+    '（整理后发现，此时说的这些名字为2号，4号，5号，具体名字无法一一对应）\n' +
+    '7：这到底怎么回事？\n' +
+    '1：走吧走吧 ' },
+          { name: '厅-1-2-4-5-7', description: '(哔哔——）\n' +
+    '(录音机开始工作的声音)\n' +
+    '1：你们刚刚怎么不拉着点？这下秀英姐把她拉出<b>门</b>外了，太危险了。\n' +
+    '5：管他们干嘛，生死有命富贵在天的道理不懂吗？小屁孩。\n' +
+    '1：我要出去找他们。\n' +
+    '5：去吧，这里又不是学校，没人管你。\n' +
+    '2：你别去了，万一...\n' +
+    '（门关上的声音）\n' +
+    '4：李飞燕你过分了，郑凡还是个孩子，你和她吵什么？\n' +
+    '5：哼，这时候出来了，刚刚去哪儿了呀？\n' +
+    '（屋内沉寂了一会儿 直到门再次被打开）\n' +
+    '4：郑凡，你怎么又领进来个人？\n' +
+    '1：......\n' +
+    '7：你们好？你们有没有见一个大概这么高，低马尾，戴眼镜的女生，和我差不多大。\n' +
+    '5：哈哈哈居然还有这么巧的事，是不是还背着这个大包？\n' +
+    '7：对！这是她的背包！她来过这儿？她现在去哪儿了？\n' +
+    '5：刚刚还在这儿，才出去，你赶紧出去找她去呗。\n' +
+    '7：才出去？我怎么没看到？不行，我要去找她。\n' +
+    '4：李飞燕你闭嘴。你等一下，你朋友八成还会回来，你在这缓一会儿再去找她也不晚。' },
+          { name: '厅-1-2-3-4-5-6', description: '(哔哔——)\n' +
+'(录音机开始工作的声音)\n' +
+'5：哟，怎么进来一个？\n' +
+'（性别女 年龄预计25岁左右）\n' +
+'3：你们到底是谁？我女儿呢？\n' +
+'（性别女 年龄预计40岁左右）\n' +
+'4：都先别吵吵了行吗？我们现在的问题是我们为什么在这里。\n' +
+'（性别女 年龄预计30岁左右）\n' +
+'5：喂，门口的，你又是谁？怎么过来的？\n' +
+'6：你们又是谁？\n' +
+'1：我叫郑凡，我不知道怎么过来的，这是陈默姐。\n' +
+'2：你好。\n' +
+'4：我是赵翠柳，你是从哪儿进来的？\n' +
+'6：我当然是从大门进来的。\n' +
+'4：哪个方位？\n' +
+'3：你从外面进来的？那你能出去吗？\n' +
+'6：外面都是雾啊，你们不是从外面进来的？\n' +
+'3：你先带我出去，我要离开这里。\n' +
+'1：你冷静一下秀英姐，我们还没搞清状况，你就这样出去不安全。\n' +
+'3：别拦我，我得马上回去！我女儿还等着我呢！\n' +
+'6：你拉我干什么？\n' +
+'3：你带我出去，快点！\n' +
+'1：你们拉一下啊，别光看着！\n' +
+'（一阵嘈杂的声音之后 有物体掉落的声音 随即是大门迅速打开的声音）' },
+		  { name: '门-3-6', description: '(哔哔——)\n' +
+'(录音机开始工作的声音)\n' +
+'6：你这样拉着我怎么给你带路？\n' +
+'3：行，我松开你，你带我出去之后，想去哪儿我都不管。\n' +
+'6：这里雾这么大，我只能尽力带你回去。\n' +
+'（很长一段时间只有匆忙的脚步声）\n' +
+'3：你是不是带我绕路？我们回到这个大厅门口两次了。\n' +
+'6：我确实想回去，因为我的包刚刚落在大厅了，但我没带你绕路，我就是从这个方向进来的。\n' +
+'3：这才一会儿你就把路忘了？\n' +
+'6：这里不对劲，我和我同事一起进来的，但是却分开了。\n' +
+'3：别和我说其他的，我就问你能带我出去吗？\n' +
+'6：再试一次，找不到路的话我们先回到大厅，情况很不妙。\n' +
+'（又是一阵阵脚步声）\n' +
+'6：又到门口了，我们进去吧。\n' +
+'3：你自己回去吧，我要再试试。' },
+		  { name: '门-3', description: '3：女儿，我马上就回来。\n' +
+'（过了一段时间）\n' +
+'3：我一定要出去，女儿还在等我呢。\n' +
+'（很长时间里只有不停的风声和她有些疲惫的喘气声）\n' +
+'（又过了很久才有她无奈的叹息 之后是门被推开的声音）' },
+		  { name: '厅-1-2-4-5-6-7', description: '(哔哔——)\n' +
+'(录音机开始工作的声音)\n' +
+'7：我等不了了，我要出去找她。\n' +
+'1：翠柳姐，你劝劝她吧。\n' +
+'4：你朋友的包还在这里，她还会回来的。\n' +
+'2：嗯，再等等吧。\n' +
+'7：对，包还在这儿，我再等等，再等等。\n' +
+'（寂静了一会儿，又是一阵开门声，随后是匆忙的脚步声）\n' +
+'7：终于等到你了，幸好我没走，幸好她和我说你会回来。\n' +
+'6：谁？翠柳姐？你怎么知道我会回来的？\n' +
+'4：你俩没来之前我们五个就在这儿商量了，而他们四个没来之前我就在这儿了。\n' +
+'5：你怎么不和我们说？\n' +
+'4：你也没问。\n' +
+'5：那我问你，你在我们来之前都干什么了？\n' +
+'4：我在塔内简单走了一圈，在外面走了一圈，没找到出去的路。\n' +
+'1：塔内还有什么地方吗？\n' +
+'4：我一共走到第三层，也就是中层，底层除了这个大厅，还有个大仓库，下层有个食堂和大宿舍，中层是小厅和两个小宿舍。\n' +
+'2：我到这儿就在<b>大仓库</b>了，那里很暗，地面有些脏，除了这些没什么了。\n' +
+'5：你不说也是因为没问吗？\n' +
+'2：嗯...\n' +
+'6：行，那你先和我去<b>仓库</b>看看\n' +
+'7：我吗？哦哦。' },
+		  { name: '旧管道声.ogg', description: '旧管道内的声音，类似敲击密码。' },
+		  { name: '旧管道声.ogg', description: '旧管道内的声音，类似敲击密码。' }
+        ],
+        '中层': [
+          { name: '下层走廊.wav', description: '下层走廊的环境音，脚步由远及近。' },
+          { name: '废弃房间.aac', description: '废弃房间内的录音，有持续低鸣。' },
+          { name: '下层日记.mp3', description: '某人留下的日记朗读，内容残缺。' }
+        ],
+        '上层': [
+          { name: '中层图书馆.flac', description: '图书馆内的录音，书页翻动声夹杂低语。' },
+          { name: '会议室记录.wav', description: '一次秘密会议的录音片段。' },
+          { name: '中层密室.ogg', description: '密室内的录音，有金属摩擦声。' }
+        ],
+        '顶层': [
+          { name: '上层观测点.mp3', description: '观测点的风声和电子噪音。' },
+          { name: '天线信号.aac', description: '天线接收到的未知信号录音。' },
+          { name: '塔顶遗言.wav', description: '在塔顶发现的录音设备，留下一段遗言。' }
+        ]
+      };
+
+      const addedFilesMap = {};
+      const addedNamesMap = {};
+      allLevels.forEach(level => {
+        addedFilesMap[level] = [];
+        addedNamesMap[level] = new Set();
+      });
+      if (!addedFilesMap['底层']) {
+        addedFilesMap['底层'] = [];
+        addedNamesMap['底层'] = new Set();
+      }
+
+      let currentLevel = '下层';
+      let selectedFile = null;
+
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const fileListEl = document.getElementById('fileList');
+      const detailTitle = document.getElementById('detailTitle');
+      const detailDescription = document.getElementById('detailDescription');
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      
+      const modal = document.getElementById('slotModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const slotBtns = document.querySelectorAll('.slot-btn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+
+      let currentAction = null;
+
+      const STORAGE_KEY = 'audioLogsAddedFiles';
+
+      // ---------- 保存日记的通用函数（无日期） ----------
+      function saveDiaryEntry(title, content) {
+        const plainContent = content.replace(/<[^>]*>/g, ''); // 去除HTML标签
+        const diaryEntry = {
+          id: Date.now().toString(),
+          title: title,
+          content: plainContent
+        };
+        let diary = JSON.parse(localStorage.getItem('diaryEntries') || '[]');
+        diary.push(diaryEntry);
+        localStorage.setItem('diaryEntries', JSON.stringify(diary));
+        alert('已保存到日记');
+      }
+
+      // ---------- 其他函数保持不变 ----------
+      function saveToStorage() {
+        const storageData = {};
+        Object.keys(addedFilesMap).forEach(level => {
+          storageData[level] = {
+            files: addedFilesMap[level],
+            names: Array.from(addedNamesMap[level])
+          };
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+      }
+
+      function loadFromStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        try {
+          const data = JSON.parse(saved);
+          Object.keys(data).forEach(level => {
+            if (addedFilesMap.hasOwnProperty(level)) {
+              addedFilesMap[level] = data[level].files || [];
+              addedNamesMap[level] = new Set(data[level].names || []);
+            }
+          });
+        } catch (e) {}
+      }
+
+      function saveToSlot(slot) {
+        const storageData = {};
+        Object.keys(addedFilesMap).forEach(level => {
+          storageData[level] = {
+            files: addedFilesMap[level],
+            names: Array.from(addedNamesMap[level])
+          };
+        });
+        localStorage.setItem(`audioLogsSave_${slot}`, JSON.stringify(storageData));
+        alert(`进度已保存到存档槽 ${slot}`);
+      }
+
+      function loadFromSlot(slot) {
+        const saved = localStorage.getItem(`audioLogsSave_${slot}`);
+        if (!saved) {
+          alert(`存档槽 ${slot} 为空！`);
+          return false;
+        }
+        try {
+          const data = JSON.parse(saved);
+          Object.keys(data).forEach(level => {
+            if (addedFilesMap.hasOwnProperty(level)) {
+              addedFilesMap[level] = data[level].files || [];
+              addedNamesMap[level] = new Set(data[level].names || []);
+            }
+          });
+          selectedFile = initialFiles[currentLevel] || { name: '暂无初始文件', description: '' };
+          renderFileList();
+          removeAllHighlights();
+          saveToStorage();
+          alert(`从存档槽 ${slot} 加载成功`);
+          return true;
+        } catch (e) {
+          alert('读取存档失败');
+          return false;
+        }
+      }
+
+      function resetProgress() {
+        if (!confirm('确定重新开始吗？所有已搜索的文件将被清空。')) return;
+        allLevels.forEach(level => {
+          addedFilesMap[level] = [];
+          addedNamesMap[level] = new Set();
+        });
+        if (addedFilesMap['底层']) {
+          addedFilesMap['底层'] = [];
+          addedNamesMap['底层'] = new Set();
+        }
+        localStorage.removeItem(STORAGE_KEY);
+        selectedFile = initialFiles[currentLevel] || { name: '暂无初始文件', description: '' };
+        renderFileList();
+        removeAllHighlights();
+        alert('进度已重置');
+      }
+
+      function removeAllHighlights() {
+        document.querySelectorAll('.file-item.new-file').forEach(el => el.classList.remove('new-file'));
+      }
+
+      function updateDetail(file) {
+        if (file) {
+          detailTitle.textContent = file.name;
+          // 将 <日记残页...> 转换为可点击链接
+          let descriptionHtml = file.description;
+          descriptionHtml = descriptionHtml.replace(/<(日记残页[^>]*)>/g, '<span class="diary-link" data-diary-title="$1">$1</span>');
+          detailDescription.innerHTML = descriptionHtml;
+        } else {
+          detailTitle.textContent = '';
+          detailDescription.textContent = '选择一个文件查看详情';
+        }
+      }
+
+      // 为详情容器添加点击事件代理（处理日记链接点击）
+      detailDescription.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('diary-link') && selectedFile) {
+          const diaryTitle = target.dataset.diaryTitle || '日记残页';
+          saveDiaryEntry(diaryTitle, selectedFile.description);
+        }
+      });
+
+      function createFileItem(file) {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        if (selectedFile && selectedFile.name === file.name) {
+          div.classList.add('active');
+        }
+        div.dataset.filename = file.name;
+        div.innerHTML = `<span class="file-name">${file.name}</span>`;
+
+        div.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeAllHighlights();
+          document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+          div.classList.add('active');
+          selectedFile = file;
+          updateDetail(file);
+        });
+        return div;
+      }
+
+      function renderFileList() {
+        fileListEl.innerHTML = '';
+
+        const initial = initialFiles[currentLevel] || { name: '暂无初始文件', description: '该楼层尚未定义初始录音。' };
+        fileListEl.appendChild(createFileItem(initial));
+
+        const added = addedFilesMap[currentLevel] || [];
+        added.forEach(file => fileListEl.appendChild(createFileItem(file)));
+
+        if (selectedFile) {
+          const activeItem = Array.from(fileListEl.children).find(
+            item => item.dataset.filename === selectedFile.name
+          );
+          if (activeItem) {
+            activeItem.classList.add('active');
+          } else {
+            selectedFile = initialFiles[currentLevel] || { name: '暂无初始文件', description: '' };
+            fileListEl.firstChild.classList.add('active');
+            updateDetail(selectedFile);
+          }
+        } else {
+          selectedFile = initialFiles[currentLevel] || { name: '暂无初始文件', description: '' };
+          fileListEl.firstChild.classList.add('active');
+          updateDetail(selectedFile);
+        }
+      }
+
+      function performSearch(keyword) {
+        const trimmed = keyword.trim();
+
+        if (!trimmed) {
+          renderFileList();
+          detailTitle.textContent = '搜索';
+          detailDescription.textContent = '请输入关键词';
+          return;
+        }
+
+        const lowerKeyword = trimmed.toLowerCase();
+        const allCurrentFiles = levelFiles[currentLevel] || [];
+        const matchedNew = allCurrentFiles.filter(file =>
+          file.name.toLowerCase().includes(lowerKeyword) &&
+          !addedNamesMap[currentLevel].has(file.name)
+        );
+
+        if (matchedNew.length === 0) {
+          renderFileList();
+          detailTitle.textContent = '无新文件';
+          detailDescription.textContent = '没有找到匹配的新录音文件。';
+          return;
+        }
+
+        matchedNew.forEach(file => {
+          addedFilesMap[currentLevel].push(file);
+          addedNamesMap[currentLevel].add(file.name);
+        });
+
+        renderFileList();
+
+        matchedNew.forEach(file => {
+          const items = fileListEl.querySelectorAll('.file-item');
+          for (let item of items) {
+            if (item.dataset.filename === file.name) {
+              item.classList.add('new-file');
+              break;
+            }
+          }
+        });
+
+        saveToStorage();
+      }
+
+      function switchLevel(level) {
+        if (level === currentLevel) return;
+
+        levelBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.level === level);
+        });
+
+        currentLevel = level;
+        searchInput.value = '';
+        renderFileList();
+      }
+
+      function openModal(action) {
+        currentAction = action;
+        modalTitle.textContent = action === 'save' ? '保存到槽位' : '从槽位读取';
+        slotBtns.forEach(btn => {
+          const slot = btn.dataset.slot;
+          const hasSave = localStorage.getItem(`audioLogsSave_${slot}`) !== null;
+          btn.classList.toggle('has-save', hasSave);
+        });
+        modal.style.display = 'flex';
+      }
+
+      function closeModal() {
+        modal.style.display = 'none';
+        currentAction = null;
+      }
+
+      function init() {
+        loadFromStorage();
+
+        levelBtns.forEach(btn => {
+          btn.addEventListener('click', () => switchLevel(btn.dataset.level));
+        });
+
+        searchBtn.addEventListener('click', () => performSearch(searchInput.value));
+        searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') searchBtn.click();
+        });
+
+        saveBtn.addEventListener('click', () => openModal('save'));
+        loadBtn.addEventListener('click', () => openModal('load'));
+        resetBtn.addEventListener('click', resetProgress);
+
+        slotBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const slot = btn.dataset.slot;
+            if (currentAction === 'save') {
+              saveToSlot(slot);
+            } else if (currentAction === 'load') {
+              loadFromSlot(slot);
+            }
+            closeModal();
+          });
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeModal();
+        });
+
+        renderFileList();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
