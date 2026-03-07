@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>她的塔</title>
+  <style>
+    /* ---------- 全局重置：暗黑基调 ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #0e0b09;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+      font-size: 4.8rem;
+      font-weight: 800;
+      color: #7a6852;
+      text-shadow: 5px 5px 0 #1e1813, 8px 8px 15px rgba(0,0,0,0.7);
+      letter-spacing: 6px;
+      font-family: 'Times New Roman', serif;
+      text-transform: uppercase;
+      border-bottom: 3px double #6a5a48;
+      padding-bottom: 0.8rem;
+      display: inline-block;
+      line-height: 1.2;
+      transform: rotate(-0.3deg);
+      margin: 0;
+    }
+
+    .page-title span {
+      color: #9b846b;
+      font-size: 5rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.15rem 0;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-top-right-radius: 15px;
+      border-bottom-left-radius: 15px;
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.2;
+      height: 24px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 0.3rem;
+      width: 180px;
+      justify-content: flex-end;
+    }
+
+    .action-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: #1e1a16;
+      color: #cfc5b7;
+      padding: 2rem 1.8rem;
+      border: 2px solid #5f5343;
+      box-shadow: 0 20px 25px -12px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
+      position: relative;
+      border-radius: 0;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+      box-shadow: 0 25px 30px -12px #000000, inset 0 0 50px #3a2e22;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="1" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.06"/></svg>');
+      opacity: 0.1;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+    }
+
+    .card h2 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #dac5b0;
+      margin-bottom: 1.5rem;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 2px 2px 0 #2e271f;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .card:nth-child(1) h2 { border-left-color: #9e7e5e; }
+    .card:nth-child(2) h2 { border-left-color: #ba8b5a; }
+    .card:nth-child(3) h2 { border-left-color: #6f8b8b; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background-color: transparent;
+      color: #e1d5c4;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 1rem 0.5rem;
+      text-align: center;
+      border: 3px solid #7d6b58;
+      transition: all 0.2s;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background-image: linear-gradient(145deg, #3b3229, #1f1b16);
+      box-shadow: 0 6px 0 #0e0c09, 0 8px 15px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 1;
+      font-family: 'Courier New', monospace;
+      border-radius: 0px;
+      border-top-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      background-image: linear-gradient(145deg, #4f4236, #302a22);
+      border-color: #c7aa8b;
+      color: #f7ede0;
+      transform: translateY(2px);
+      box-shadow: 0 4px 0 #0e0c09, 0 6px 12px rgba(0,0,0,0.6);
+    }
+
+    .btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #0e0c09, 0 5px 10px rgba(0,0,0,0.6);
+    }
+
+    .btn.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .card:last-child .btn {
+      border-color: #4f6364;
+      background-image: linear-gradient(145deg, #2f3a38, #1f2625);
+    }
+    .card:last-child .btn:hover {
+      border-color: #87a1a1;
+    }
+
+    /* ---------- 存档/读档模态框 ---------- */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: linear-gradient(145deg, #1f1a16, #16110e);
+      border: 2px solid #b89b7b;
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px #4a3f35;
+      position: relative;
+    }
+    .modal-content h3 {
+      color: #e6d5c0;
+      margin-bottom: 1.8rem;
+      font-size: 1.8rem;
+      border-left: 6px solid #b89b7b;
+      padding-left: 1rem;
+      text-align: left;
+      font-family: 'Times New Roman', serif;
+      text-shadow: 2px 2px 0 #2e271f;
+      letter-spacing: 2px;
+    }
+    .slot-buttons {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .slot-btn {
+      width: 70px;
+      height: 70px;
+      background: #2b241f;
+      border: 2px solid #b89b7b;
+      color: #e6d5c0;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 50%;
+      box-shadow: 0 6px 0 #0e0c09, 0 8px 15px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slot-btn:hover {
+      background: #4f4236;
+      border-color: #dec9b0;
+      color: #fff8e7;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #0e0c09, 0 12px 20px rgba(0,0,0,0.6);
+    }
+    .slot-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #0e0c09, 0 5px 12px rgba(0,0,0,0.6);
+    }
+    .slot-btn.has-save {
+      background: #4a3f35;
+      border-color: #dec9b0;
+      color: #fff8e7;
+      box-shadow: 0 0 15px #b89b7b;
+    }
+    .modal-close {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 40px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 0.5rem;
+    }
+    .modal-close:hover {
+      background-color: #3b3229;
+      border-color: #b89b7b;
+      color: #fff8e7;
+    }
+
+    /* ---------- 通用消息模态框 ---------- */
+    .message-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+      backdrop-filter: blur(4px);
+    }
+    .message-content {
+      background: linear-gradient(145deg, #1f1a16, #16110e);
+      border: 2px solid #b89b7b;
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px #4a3f35;
+    }
+    .message-content p {
+      color: #e6d5c0;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Courier New', monospace;
+      border-left: 4px solid #b89b7b;
+      padding-left: 1rem;
+      text-align: left;
+    }
+    .message-btn {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 40px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      width: 100%;
+    }
+    .message-btn:hover {
+      background-color: #3b3229;
+      border-color: #b89b7b;
+      color: #fff8e7;
+    }
+
+    /* 确认模态框（使用两个按钮） */
+    .confirm-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .confirm-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 40px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .confirm-btn:hover {
+      background-color: #3b3229;
+      border-color: #b89b7b;
+      color: #fff8e7;
+    }
+    .confirm-btn:first-child {
+      border-color: #b89b7b;
+      background: #2b241f;
+    }
+
+    @media screen and (max-width: 900px) {
+      .card-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media screen and (max-width: 700px) {
+      .title-row { flex-direction: column; gap: 1rem; align-items: center; }
+      .card-row { grid-template-columns: 1fr; gap: 1.5rem; }
+      .page-title { font-size: 3.5rem; }
+      .page-title span { font-size: 3.8rem; }
+      .card { padding: 1.8rem 1.5rem; }
+      .card h2 { font-size: 2rem; }
+    }
+    @media screen and (max-width: 480px) {
+      .page-title { font-size: 2.8rem; }
+      .page-title span { font-size: 3rem; }
+      .card h2 { font-size: 1.8rem; }
+      .btn { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="title-row">
+    <h1 class="page-title">
+      <span>&lt;</span>塔<span>&gt;</span>
+    </h1>
+    <div class="top-buttons">
+      <button class="action-btn" id="saveBtn">存档</button>
+      <button class="action-btn" id="loadBtn">读档</button>
+      <button class="action-btn" id="resetBtn">重置</button>
+    </div>
+  </div>
+
+  <div class="card-row">
+    <div class="card">
+      <h2>录音档案</h2>
+      <a href="audio-logs.html" class="btn">查看</a>
+    </div>
+    <div class="card">
+      <h2>日记</h2>
+      <a href="diary.html" class="btn" id="diaryBtn">翻阅</a>
+    </div>
+    <div class="card">
+      <h2>暂定</h2>
+      <a href="placeholder.html" class="btn">探索未知</a>
+    </div>
+  </div>
+
+  <!-- 存档/读档模态框 -->
+  <div class="modal" id="slotModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">选择槽位</h3>
+      <div class="slot-buttons">
+        <button class="slot-btn" data-slot="1">1</button>
+        <button class="slot-btn" data-slot="2">2</button>
+        <button class="slot-btn" data-slot="3">3</button>
+      </div>
+      <button class="modal-close" id="closeModalBtn">取消</button>
+    </div>
+  </div>
+
+  <!-- 通用消息模态框（单按钮） -->
+  <div class="message-modal" id="messageModal">
+    <div class="message-content">
+      <p id="messageText"></p>
+      <button class="message-btn" id="messageOkBtn">确定</button>
+    </div>
+  </div>
+
+  <!-- 确认模态框（双按钮） -->
+  <div class="message-modal" id="confirmModal">
+    <div class="message-content">
+      <p id="confirmText"></p>
+      <div class="confirm-buttons">
+        <button class="confirm-btn" id="confirmYesBtn">确定</button>
+        <button class="confirm-btn" id="confirmNoBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- 自定义提示函数 ----------
+      const messageModal = document.getElementById('messageModal');
+      const messageText = document.getElementById('messageText');
+      const messageOkBtn = document.getElementById('messageOkBtn');
+
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmText = document.getElementById('confirmText');
+      const confirmYesBtn = document.getElementById('confirmYesBtn');
+      const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+      function showMessage(msg) {
+        messageText.textContent = msg;
+        messageModal.style.display = 'flex';
+        return new Promise((resolve) => {
+          const onOk = () => {
+            messageModal.style.display = 'none';
+            messageOkBtn.removeEventListener('click', onOk);
+            resolve();
+          };
+          messageOkBtn.addEventListener('click', onOk, { once: true });
+        });
+      }
+
+      function showConfirm(msg) {
+        confirmText.textContent = msg;
+        confirmModal.style.display = 'flex';
+        return new Promise((resolve) => {
+          const onYes = () => {
+            confirmModal.style.display = 'none';
+            confirmYesBtn.removeEventListener('click', onYes);
+            confirmNoBtn.removeEventListener('click', onNo);
+            resolve(true);
+          };
+          const onNo = () => {
+            confirmModal.style.display = 'none';
+            confirmYesBtn.removeEventListener('click', onYes);
+            confirmNoBtn.removeEventListener('click', onNo);
+            resolve(false);
+          };
+          confirmYesBtn.addEventListener('click', onYes, { once: true });
+          confirmNoBtn.addEventListener('click', onNo, { once: true });
+        });
+      }
+
+      // 点击模态框外部不关闭（保持专注）
+      messageModal.addEventListener('click', (e) => {
+        if (e.target === messageModal) return;
+      });
+      confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) return;
+      });
+
+      const AUTO_SAVE_KEY = 'audioLogsAddedFiles';
+      
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const modal = document.getElementById('slotModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const slotBtns = document.querySelectorAll('.slot-btn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const diaryBtn = document.getElementById('diaryBtn');
+
+      let currentAction = null;
+
+      function getAutoSaveData() {
+        const saved = localStorage.getItem(AUTO_SAVE_KEY);
+        if (!saved) return null;
+        try { return JSON.parse(saved); } catch { return null; }
+      }
+
+      function setAutoSaveData(data) {
+        localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
+      }
+
+      async function saveToSlot(slot) {
+        const autoData = getAutoSaveData();
+        if (!autoData) {
+          await showMessage('当前无游戏进度可保存。请先进入录音档案进行搜索。');
+          return false;
+        }
+        localStorage.setItem(`audioLogsSave_${slot}`, JSON.stringify(autoData));
+        await showMessage(`进度已保存到存档槽 ${slot}`);
+        return true;
+      }
+
+      async function loadFromSlot(slot) {
+        const saved = localStorage.getItem(`audioLogsSave_${slot}`);
+        if (!saved) {
+          await showMessage(`存档槽 ${slot} 为空！`);
+          return false;
+        }
+        try {
+          const data = JSON.parse(saved);
+          setAutoSaveData(data);
+          await showMessage(`从存档槽 ${slot} 加载成功，即将跳转到录音档案`);
+          window.location.href = 'audio-logs.html';
+          return true;
+        } catch (e) {
+          await showMessage('读取存档失败');
+          return false;
+        }
+      }
+
+      async function resetProgress() {
+        const confirmed = await showConfirm('确定重置当前进度吗？所有已搜索的文件和日记将被清空，但存档槽不受影响。');
+        if (!confirmed) return;
+        
+        localStorage.removeItem(AUTO_SAVE_KEY);
+        localStorage.removeItem('diaryEntries');
+        
+        // 更新日记按钮状态
+        checkDiaryStatus();
+        
+        await showMessage('当前进度已重置');
+      }
+
+      function openModal(action) {
+        currentAction = action;
+        modalTitle.textContent = action === 'save' ? '保存到槽位' : '从槽位读取';
+        slotBtns.forEach(btn => {
+          const slot = btn.dataset.slot;
+          const hasSave = localStorage.getItem(`audioLogsSave_${slot}`) !== null;
+          btn.classList.toggle('has-save', hasSave);
+        });
+        modal.style.display = 'flex';
+      }
+
+      function closeModal() {
+        modal.style.display = 'none';
+        currentAction = null;
+      }
+
+      function checkDiaryStatus() {
+        const diaryEntries = localStorage.getItem('diaryEntries');
+        let hasEntries = false;
+        if (diaryEntries) {
+          try {
+            const entries = JSON.parse(diaryEntries);
+            hasEntries = entries.length > 0;
+          } catch (e) {}
+        }
+        if (hasEntries) {
+          diaryBtn.href = 'diary.html';
+          diaryBtn.classList.remove('disabled');
+        } else {
+          diaryBtn.href = 'javascript:void(0);';
+          diaryBtn.classList.add('disabled');
+        }
+      }
+
+      saveBtn.addEventListener('click', () => openModal('save'));
+      loadBtn.addEventListener('click', () => openModal('load'));
+      resetBtn.addEventListener('click', resetProgress);
+
+      slotBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const slot = btn.dataset.slot;
+          if (currentAction === 'save') saveToSlot(slot);
+          else if (currentAction === 'load') loadFromSlot(slot);
+          closeModal();
+        });
+      });
+
+      closeModalBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      // 初始化检查日记状态
+      checkDiaryStatus();
+    })();
+  </script>
+</body>
+</html>

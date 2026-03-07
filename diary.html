@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>塔 · 日记</title>
+  <style>
+    /* ---------- 全局样式（与录音档案保持一致） ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #0e0b09;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .back-link {
+      width: 80px;
+      text-align: center;
+      color: #b8aa9c;
+      text-decoration: none;
+      font-size: 1.2rem;
+      border: 2px solid #5f5343;
+      padding: 0.5rem 0.2rem;
+      transition: 0.2s;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+    }
+    .back-link:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    .page-title {
+      font-size: 3rem;
+      color: #7a6852;
+      text-shadow: 4px 4px 0 #1e1813;
+      letter-spacing: 4px;
+      margin: 0;
+      border-bottom: 3px double #6a5a48;
+      padding-bottom: 0.5rem;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      width: 180px;
+      justify-content: flex-end;
+    }
+    .action-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.15rem 0;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-top-right-radius: 15px;
+      border-bottom-left-radius: 15px;
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.2;
+      height: 24px;
+      font-family: 'Courier New', monospace;
+    }
+    .action-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 2rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .left-panel {
+      width: 30%;
+      min-width: 250px;
+      background-color: #1a1613;
+      border: 2px solid #5f5343;
+      padding: 1.5rem 1rem;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    .left-panel h2 {
+      color: #dac5b0;
+      font-size: 1.5rem;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .diary-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .diary-item {
+      padding: 0.8rem 1rem;
+      border: 2px solid transparent;
+      border-bottom: 1px dashed #5f5343;
+      color: #cfc5b7;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .diary-item:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+    }
+    .diary-item.active {
+      background-color: #3b3229;
+      border-color: #c7aa8b;
+      color: #f7ede0;
+    }
+    .diary-item .title {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .right-panel {
+      width: 70%;
+      background-color: #1a1613;
+      border: 2px solid #5f5343;
+      padding: 2rem;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      overflow-y: auto;
+    }
+    .detail-title {
+      font-size: 2rem;
+      color: #dac5b0;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      margin-bottom: 1rem;
+    }
+    .detail-content {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #cfc5b7;
+      white-space: pre-wrap;
+    }
+    .placeholder-text {
+      color: #6a5a48;
+      font-style: italic;
+      font-size: 1.2rem;
+    }
+
+    /* 滚动条样式 */
+    .diary-list::-webkit-scrollbar,
+    .right-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+    .diary-list::-webkit-scrollbar-track,
+    .right-panel::-webkit-scrollbar-track {
+      background: #1e1a16;
+      border-radius: 4px;
+    }
+    .diary-list::-webkit-scrollbar-thumb,
+    .right-panel::-webkit-scrollbar-thumb {
+      background: #5f5343;
+      border-radius: 4px;
+      border: 1px solid #3b3229;
+    }
+    .diary-list::-webkit-scrollbar-thumb:hover,
+    .right-panel::-webkit-scrollbar-thumb:hover {
+      background: #7d6b58;
+    }
+
+    /* ---------- 通用消息模态框 ---------- */
+    .message-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+      backdrop-filter: blur(4px);
+    }
+    .message-content {
+      background: linear-gradient(145deg, #1f1a16, #16110e);
+      border: 2px solid #b89b7b;
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px #4a3f35;
+    }
+    .message-content p {
+      color: #e6d5c0;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'Courier New', monospace;
+      border-left: 4px solid #b89b7b;
+      padding-left: 1rem;
+      text-align: left;
+    }
+    .message-btn {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 40px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      width: 100%;
+    }
+    .message-btn:hover {
+      background-color: #3b3229;
+      border-color: #b89b7b;
+      color: #fff8e7;
+    }
+
+    /* 确认模态框（使用两个按钮） */
+    .confirm-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .confirm-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      border-radius: 40px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .confirm-btn:hover {
+      background-color: #3b3229;
+      border-color: #b89b7b;
+      color: #fff8e7;
+    }
+    .confirm-btn:first-child {
+      border-color: #b89b7b;
+      background: #2b241f;
+    }
+
+    @media (max-width: 800px) {
+      body { padding: 1rem; }
+      .top-row { flex-wrap: wrap; gap: 1rem; }
+      .main-content { flex-direction: column; }
+      .left-panel, .right-panel { width: 100%; }
+      .action-buttons { width: auto; }
+      .action-btn { flex: 0 1 auto; padding: 0.15rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-row">
+    <a href="ta.html" class="back-link">返回</a>
+    <h1 class="page-title">日记</h1>
+    <div class="action-buttons">
+      <button class="action-btn" id="saveBtn">存档</button>
+      <button class="action-btn" id="loadBtn">读档</button>
+      <button class="action-btn" id="resetBtn">重置</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-panel">
+      <h2>日记条目</h2>
+      <div class="diary-list" id="diaryList"></div>
+    </div>
+    <div class="right-panel">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-content" id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- 通用消息模态框（单按钮） -->
+  <div class="message-modal" id="messageModal">
+    <div class="message-content">
+      <p id="messageText"></p>
+      <button class="message-btn" id="messageOkBtn">确定</button>
+    </div>
+  </div>
+
+  <!-- 确认模态框（双按钮） -->
+  <div class="message-modal" id="confirmModal">
+    <div class="message-content">
+      <p id="confirmText"></p>
+      <div class="confirm-buttons">
+        <button class="confirm-btn" id="confirmYesBtn">确定</button>
+        <button class="confirm-btn" id="confirmNoBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- 自定义提示函数 ----------
+      const messageModal = document.getElementById('messageModal');
+      const messageText = document.getElementById('messageText');
+      const messageOkBtn = document.getElementById('messageOkBtn');
+
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmText = document.getElementById('confirmText');
+      const confirmYesBtn = document.getElementById('confirmYesBtn');
+      const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+      function showMessage(msg) {
+        messageText.textContent = msg;
+        messageModal.style.display = 'flex';
+        return new Promise((resolve) => {
+          const onOk = () => {
+            messageModal.style.display = 'none';
+            messageOkBtn.removeEventListener('click', onOk);
+            resolve();
+          };
+          messageOkBtn.addEventListener('click', onOk, { once: true });
+        });
+      }
+
+      function showConfirm(msg) {
+        confirmText.textContent = msg;
+        confirmModal.style.display = 'flex';
+        return new Promise((resolve) => {
+          const onYes = () => {
+            confirmModal.style.display = 'none';
+            confirmYesBtn.removeEventListener('click', onYes);
+            confirmNoBtn.removeEventListener('click', onNo);
+            resolve(true);
+          };
+          const onNo = () => {
+            confirmModal.style.display = 'none';
+            confirmYesBtn.removeEventListener('click', onYes);
+            confirmNoBtn.removeEventListener('click', onNo);
+            resolve(false);
+          };
+          confirmYesBtn.addEventListener('click', onYes, { once: true });
+          confirmNoBtn.addEventListener('click', onNo, { once: true });
+        });
+      }
+
+      messageModal.addEventListener('click', (e) => { if (e.target === messageModal) return; });
+      confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) return; });
+
+      // ---------- 数据键 ----------
+      const DIARY_KEY = 'diaryEntries';
+      const DIARY_SAVE_PREFIX = 'diarySave_';
+
+      // 初始为空数组，不再提供默认示例数据
+      let diaryEntries = [];
+
+      function loadDiaryFromStorage() {
+        const saved = localStorage.getItem(DIARY_KEY);
+        if (saved) {
+          try {
+            diaryEntries = JSON.parse(saved);
+          } catch (e) {
+            console.warn('读取日记失败，使用空数据');
+            diaryEntries = [];
+          }
+        } else {
+          diaryEntries = []; // 确保为空
+        }
+      }
+
+      function saveDiaryToStorage() {
+        localStorage.setItem(DIARY_KEY, JSON.stringify(diaryEntries));
+      }
+
+      const diaryListEl = document.getElementById('diaryList');
+      const detailTitle = document.getElementById('detailTitle');
+      const detailContent = document.getElementById('detailContent');
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let selectedId = null;
+
+      function renderList() {
+        diaryListEl.innerHTML = '';
+        const sorted = [...diaryEntries].sort((a, b) => b.id - a.id);
+        sorted.forEach(entry => {
+          const item = document.createElement('div');
+          item.className = 'diary-item';
+          if (entry.id === selectedId) item.classList.add('active');
+          item.dataset.id = entry.id;
+          item.innerHTML = `<div class="title">${entry.title}</div>`;
+          item.addEventListener('click', () => {
+            document.querySelectorAll('.diary-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+            selectedId = entry.id;
+            showDetail(entry);
+          });
+          diaryListEl.appendChild(item);
+        });
+
+        if (selectedId && !diaryEntries.some(e => e.id === selectedId)) {
+          selectedId = null;
+          clearDetail();
+        } else if (!selectedId && diaryEntries.length > 0) {
+          const first = diaryEntries[0];
+          selectedId = first.id;
+          showDetail(first);
+          const firstItem = diaryListEl.querySelector('.diary-item');
+          if (firstItem) firstItem.classList.add('active');
+        } else if (diaryEntries.length === 0) {
+          clearDetail();
+        }
+      }
+
+      function showDetail(entry) {
+        detailTitle.textContent = entry.title || '无标题';
+        detailContent.textContent = entry.content || '无内容';
+      }
+
+      function clearDetail() {
+        detailTitle.textContent = '';
+        detailContent.textContent = '请选择一篇日记';
+      }
+
+      window.addDiaryEntry = function(newEntry) {
+        const entry = {
+          id: Date.now().toString(),
+          title: newEntry.title || '无标题',
+          content: newEntry.content || ''
+        };
+        diaryEntries.push(entry);
+        saveDiaryToStorage();
+        renderList();
+      };
+
+      async function saveToSlot(slot) {
+        localStorage.setItem(DIARY_SAVE_PREFIX + slot, JSON.stringify(diaryEntries));
+        await showMessage(`日记已保存到槽 ${slot}`);
+      }
+
+      async function loadFromSlot(slot) {
+        const saved = localStorage.getItem(DIARY_SAVE_PREFIX + slot);
+        if (!saved) {
+          await showMessage(`槽 ${slot} 为空`);
+          return;
+        }
+        try {
+          diaryEntries = JSON.parse(saved);
+          saveDiaryToStorage();
+          renderList();
+          await showMessage(`从槽 ${slot} 加载成功`);
+        } catch (e) {
+          await showMessage('读取存档失败');
+        }
+      }
+
+      async function resetDiary() {
+        const confirmed = await showConfirm('确定清空所有日记吗？');
+        if (!confirmed) return;
+        diaryEntries = [];
+        localStorage.removeItem(DIARY_KEY);
+        renderList();
+        await showMessage('日记已清空');
+      }
+
+      saveBtn.addEventListener('click', () => {
+        const slot = prompt('输入存档槽位 (1-3)', '1');
+        if (slot && slot.match(/^[1-3]$/)) saveToSlot(slot);
+      });
+      loadBtn.addEventListener('click', () => {
+        const slot = prompt('输入要读取的槽位 (1-3)', '1');
+        if (slot && slot.match(/^[1-3]$/)) loadFromSlot(slot);
+      });
+      resetBtn.addEventListener('click', resetDiary);
+
+      loadDiaryFromStorage();
+      renderList();
+    })();
+  </script>
+</body>
+</html>
