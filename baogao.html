@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>事件报告 · 她的塔</title>
+  <style>
+    /* ========== 暗黑基调 · 完全继承原版风格 ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: #0e0b09;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    /* 标题行：调整为左侧返回按钮 + 居中标题 */
+    .title-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 2.5rem;
+    }
+
+    .back-btn {
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.5rem 1.2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+      font-family: 'Courier New', monospace;
+      white-space: nowrap;
+      background-image: linear-gradient(145deg, #3b3229, #1f1b16);
+      box-shadow: 0 4px 0 #0e0c09;
+      margin-right: 2rem;
+    }
+
+    .back-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+      color: #f7ede0;
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #0e0c09;
+    }
+
+    .back-btn:active {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+
+    .page-title {
+      font-size: 4.8rem;
+      font-weight: 800;
+      color: #7a6852;
+      text-shadow: 5px 5px 0 #1e1813, 8px 8px 15px rgba(0,0,0,0.7);
+      letter-spacing: 6px;
+      font-family: 'Times New Roman', serif;
+      text-transform: uppercase;
+      border-bottom: 3px double #6a5a48;
+      padding-bottom: 0.8rem;
+      line-height: 1.2;
+      transform: rotate(-0.3deg);
+      margin: 0 auto; /* 居中 */
+    }
+
+    .page-title span {
+      color: #9b846b;
+      font-size: 5rem;
+    }
+
+    /* 卡片网格 */
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: #1e1a16;
+      color: #cfc5b7;
+      padding: 2rem 1.8rem;
+      border: 2px solid #5f5343;
+      box-shadow: 0 20px 25px -12px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
+      position: relative;
+      border-radius: 0;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      background-color: #2b241f;
+      border-color: #ad977b;
+      box-shadow: 0 25px 30px -12px #000000, inset 0 0 50px #3a2e22;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="1" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.06"/></svg>');
+      opacity: 0.1;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+    }
+
+    .card h2 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #dac5b0;
+      margin-bottom: 1.5rem;
+      border-left: 6px solid #9e7e5e;
+      padding-left: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 2px 2px 0 #2e271f;
+      font-family: 'Times New Roman', serif;
+    }
+
+    /* 卡片标题边框色微调 */
+    .card:nth-child(1) h2 { border-left-color: #9e7e5e; }
+    .card:nth-child(2) h2 { border-left-color: #ba8b5a; }
+    .card:nth-child(3) h2 { border-left-color: #6f8b8b; }
+
+    /* 报告内容样式 */
+    .report-content {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #b7aa9a;
+      flex-grow: 1;
+      font-family: 'Courier New', monospace;
+      border-left: 2px dotted #5f5343;
+      padding-left: 1rem;
+    }
+
+    .report-content p {
+      margin: 0.8rem 0;
+    }
+
+    .report-content strong {
+      color: #dac5b0;
+      font-weight: 600;
+    }
+
+    /* 右下角按钮栏 */
+    .footer-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 3rem;
+    }
+
+    .footer-btn {
+      display: inline-block;
+      background-color: transparent;
+      color: #e1d5c4;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 0.9rem 2.5rem;
+      text-align: center;
+      border: 3px solid #7d6b58;
+      transition: all 0.2s;
+      cursor: pointer;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background-image: linear-gradient(145deg, #3b3229, #1f1b16);
+      box-shadow: 0 6px 0 #0e0c09, 0 8px 15px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 1;
+      font-family: 'Courier New', monospace;
+      border-radius: 0px;
+      border-top-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      min-width: 180px;
+      width: auto;
+      margin-top: 0;
+    }
+
+    .footer-btn:hover,
+    .footer-btn:focus {
+      background-image: linear-gradient(145deg, #4f4236, #302a22);
+      border-color: #c7aa8b;
+      color: #f7ede0;
+      transform: translateY(2px);
+      box-shadow: 0 4px 0 #0e0c09, 0 6px 12px rgba(0,0,0,0.6);
+    }
+
+    .footer-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #0e0c09, 0 5px 10px rgba(0,0,0,0.6);
+    }
+
+    /* ----- 模态框家族 (完全符合暗黑风格) ----- */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background-color: #1a1613;
+      border: 3px solid #7d6b58;
+      padding: 2.5rem 2rem;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      border-top-right-radius: 40px;
+      border-bottom-left-radius: 40px;
+      box-shadow: 0 20px 30px -10px black, inset 0 0 30px #2b1f15;
+    }
+
+    .modal-content h3 {
+      color: #dac5b0;
+      margin-bottom: 1.8rem;
+      font-size: 1.8rem;
+      border-left: 4px solid #9e7e5e;
+      padding-left: 1rem;
+      text-align: left;
+      font-family: 'Times New Roman', serif;
+      letter-spacing: 2px;
+    }
+
+    /* 名字输入框 */
+    .name-input {
+      width: 100%;
+      background-color: #2b241f;
+      border: 2px solid #7d6b58;
+      color: #e1d5c4;
+      padding: 0.9rem 1rem;
+      font-size: 1.2rem;
+      font-family: 'Courier New', monospace;
+      margin: 1.2rem 0 0.8rem;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .name-input:focus {
+      border-color: #ad977b;
+      background-color: #3f362e;
+    }
+
+    .error-msg {
+      color: #b87a6b;
+      font-size: 0.9rem;
+      min-height: 1.8rem;
+      text-align: left;
+      font-style: italic;
+      padding-left: 0.5rem;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      background-color: transparent;
+      border: 2px solid #7d6b58;
+      color: #cfc5b7;
+      padding: 0.6rem 0;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-top-right-radius: 20px;
+      border-bottom-left-radius: 20px;
+      font-family: 'Courier New', monospace;
+      background-image: linear-gradient(145deg, #2b241f, #1b1713);
+    }
+
+    .modal-btn:hover {
+      background-color: #3b3229;
+      border-color: #ad977b;
+      color: #f7ede0;
+    }
+
+    /* 消息模态框内的文本 */
+    .message-text {
+      color: #cfc5b7;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin: 1.5rem 0 2rem;
+      white-space: pre-line;
+      font-family: 'Courier New', monospace;
+      border-left: 2px dotted #6a5a48;
+      padding-left: 1rem;
+      text-align: left;
+    }
+
+    /* 响应式 */
+    @media screen and (max-width: 900px) {
+      .card-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media screen and (max-width: 700px) {
+      .title-row { flex-wrap: wrap; gap: 1rem; }
+      .back-btn { margin-right: 0; }
+      .page-title { font-size: 3.5rem; }
+      .page-title span { font-size: 3.8rem; }
+      .card-row { grid-template-columns: 1fr; gap: 1.5rem; }
+      .card { padding: 1.8rem 1.5rem; }
+      .card h2 { font-size: 2rem; }
+      .footer-buttons { justify-content: center; flex-wrap: wrap; }
+    }
+    @media screen and (max-width: 480px) {
+      .page-title { font-size: 2.8rem; }
+      .page-title span { font-size: 3rem; }
+      .card h2 { font-size: 1.8rem; }
+      .footer-btn { min-width: 140px; font-size: 1rem; padding: 0.7rem 1.2rem; }
+    }
+
+    /* 输入错误抖动 */
+    .error-shake {
+      animation: shake 0.2s ease-in-out 0s 2;
+      border-color: #b87a6b !important;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- 标题行：左上角返回按钮 + 居中标题 -->
+  <div class="title-row">
+    <button class="back-btn" id="backBtn">← 返回</button>
+    <h1 class="page-title">
+      <span>&lt;</span>事件报告<span>&gt;</span>
+    </h1>
+  </div>
+
+  <!-- 卡片区域：报告内容已填充 -->
+  <div class="card-row">
+    <!-- 卡片1：基础信息 -->
+    <div class="card">
+      <h2>基础档案</h2>
+      <div class="report-content">
+        <p><strong>事件命名：</strong>&lt;塔&gt;<br>
+        <strong>机密等级：</strong>绝密<br>
+        <strong>发生地点：</strong>A县姬巷最北部的无名塔内。<br>
+        <strong>初步调查：</strong>该塔于本月月初发生异常，里面不定时传来女性呼喊，范围包括但不限于女婴、青少年、成年女性、老年女性，团队组织进入多次，皆以失败告终。</p>
+      </div>
+    </div>
+    <!-- 卡片2：调查分析 -->
+    <div class="card">
+      <h2>调查分析</h2>
+      <div class="report-content">
+        <p><strong>初步分析：</strong>大多数队员无法进入，仅两位女性成员可以自由出入。据团队分析，此塔只接受姬巷村某些年份的成年女性进入，我们几经寻找，仅您一人符合条件。这二位队员多次进入塔内进行探索，获取大量录音并整理出相关线索。但除她们二人，其余人看不到他们关于本事件的记录。</p>
+      </div>
+    </div>
+    <!-- 卡片3：委托说明 -->
+    <div class="card">
+      <h2>委托说明</h2>
+      <div class="report-content">
+        <p>本次邀请是委托您基于我们二位队员的记录进行分析。您先前看到的手写内容也是出自她们，但她二人均以未知因素住院无法进行后续工作，具体原因未知。因为您是唯一通过公众号联系我们的人，我们团队认为您拥有解决本次事件的能力。</p>
+        <p>此次任务大概率存在危险，若您同意继续，我们将把相关文件发给您并派遣专人尽全力保护您的安全，请您谨慎考虑！再次感谢您的回复！</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右下角两个按钮 -->
+  <div class="footer-buttons">
+    <button class="footer-btn" id="disagreeBtn">不同意继续</button>
+    <button class="footer-btn" id="agreeBtn">同意继续</button>
+  </div>
+
+  <!-- ========== 模态框：姓名验证 (已移除返回塔门按钮) ========== -->
+  <div class="modal" id="nameModal">
+    <div class="modal-content">
+      <h3>✧ 身份验证 ✧</h3>
+      <p style="color:#b7aa9a; text-align:left; margin-bottom:0.2rem;">请输入你的名字</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="" autocomplete="off">
+      <div class="error-msg" id="nameError"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn" id="submitNameBtn">进入</button>
+      </div>
+      <p style="color:#5f5343; font-size:0.8rem; margin-top:1rem;">只有被允许的名字才能开启报告</p>
+    </div>
+  </div>
+
+  <!-- ========== 模态框：通用消息确认（用于按钮反馈） ========== -->
+  <div class="modal" id="messageModal">
+    <div class="modal-content">
+      <h3 id="messageModalTitle">消息</h3>
+      <div class="message-text" id="messageModalText"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn" id="messageConfirmBtn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- 常量 ----------
+      const REQUIRED_NAME = '齐颖';   // 唯一允许的名字
+
+      // DOM 元素
+      const nameModal = document.getElementById('nameModal');
+      const nameInput = document.getElementById('nameInput');
+      const nameError = document.getElementById('nameError');
+      const submitNameBtn = document.getElementById('submitNameBtn');
+
+      const messageModal = document.getElementById('messageModal');
+      const messageModalTitle = document.getElementById('messageModalTitle');
+      const messageModalText = document.getElementById('messageModalText');
+      const messageConfirmBtn = document.getElementById('messageConfirmBtn');
+
+      const disagreeBtn = document.getElementById('disagreeBtn');
+      const agreeBtn = document.getElementById('agreeBtn');
+      const backBtn = document.getElementById('backBtn'); // 新增返回按钮
+
+      // 当前待执行的回调 (确定后要执行的函数)
+      let confirmCallback = null;
+
+      // ---------- 辅助函数：阻止背景滚动 ----------
+      function disableBodyScroll(disable) {
+        document.body.style.overflow = disable ? 'hidden' : '';
+      }
+
+      // ---------- 打开/关闭姓名模态框 ----------
+      function openNameModal() {
+        nameModal.style.display = 'flex';
+        disableBodyScroll(true);
+        nameInput.value = '';
+        nameError.textContent = '';
+        nameInput.focus();
+      }
+
+      function closeNameModal() {
+        nameModal.style.display = 'none';
+        disableBodyScroll(false);
+      }
+
+      // ---------- 姓名验证 ----------
+      function validateAndEnter() {
+        const enteredName = nameInput.value.trim();
+        if (enteredName === REQUIRED_NAME) {
+          closeNameModal();  // 验证通过，关闭模态框，显示页面内容
+        } else {
+          nameError.textContent = '名字不符，无法进入';
+          nameInput.classList.add('error-shake');
+          setTimeout(() => nameInput.classList.remove('error-shake'), 300);
+        }
+      }
+
+      // ---------- 通用消息模态框 ----------
+      function openMessageModal(title, text, callback) {
+        messageModalTitle.textContent = title;
+        messageModalText.textContent = text;
+        confirmCallback = callback;
+        messageModal.style.display = 'flex';
+        disableBodyScroll(true);
+      }
+
+      function closeMessageModal() {
+        messageModal.style.display = 'none';
+        disableBodyScroll(false);
+        confirmCallback = null;
+      }
+
+      // ---------- 事件绑定 ----------
+      // 姓名提交
+      submitNameBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        validateAndEnter();
+      });
+
+      nameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          validateAndEnter();
+        }
+      });
+
+      // 点击模态框背景不关闭（防止误操作）
+      nameModal.addEventListener('click', (e) => {
+        if (e.target === nameModal) {
+          // 不做任何操作，必须通过按钮
+        }
+      });
+
+      // ---------- 右下角按钮 ----------
+      // 不同意继续
+      disagreeBtn.addEventListener('click', () => {
+        openMessageModal(
+          '✧ 您的决定 ✧',
+          '感谢您的参与，我们明白您的顾虑，希望您拥有幸福的一天。',
+          () => {
+            // 跳转到 naxin.html
+            window.location.href = 'index.html';
+          }
+        );
+      });
+
+      // 同意继续
+      agreeBtn.addEventListener('click', () => {
+        openMessageModal(
+          '✧ 您的决定 ✧',
+          '十分感谢您愿意协助我们！',
+          () => {
+            // 跳转到 index.html
+            window.location.href = 'index.html';
+          }
+        );
+      });
+
+      // 消息模态框确定按钮
+      messageConfirmBtn.addEventListener('click', () => {
+        if (confirmCallback) {
+          confirmCallback();  // 执行跳转
+        }
+        closeMessageModal();
+      });
+
+      // 点击消息模态框背景不关闭
+      messageModal.addEventListener('click', (e) => {
+        if (e.target === messageModal) {
+          // 不关闭
+        }
+      });
+
+      // ---------- 左上角返回按钮 ----------
+      backBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+
+      // ---------- 页面加载时强制打开姓名模态框 (每次都需要验证) ----------
+      window.addEventListener('load', function() {
+        openNameModal();
+      });
+
+      // 清理：防止刷新时滚动锁定
+      window.addEventListener('beforeunload', function() {
+        disableBodyScroll(false);
+      });
+    })();
+  </script>
+  <!-- 说明：每次进入均需输入“齐颖”验证；报告内容已填充；右下角按钮功能按需求实现；左上角返回按钮可跳转至nx.html -->
+</body>
+</html>
